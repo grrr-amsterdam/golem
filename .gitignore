@@ -1,0 +1,13 @@
+application/data/cache/pluginLoaderCache.php
+application/data/cache/URI/*
+application/data/cache/HTML/*
+application/data/cache/CSS/*
+application/data/cache/tags/*
+application/configs/version.php
+public/cached/**/*
+public/css/.sass-cache
+public/uploads/private/**/*
+public/uploads/shared/**/*
+.DS_Store
+.project
+application/data/.golemrc

@@ -1,0 +1,3 @@
+[submodule "garp"]
+	path = garp
+	url = git@flow.grrr.nl:garp3
