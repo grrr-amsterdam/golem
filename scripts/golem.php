@@ -49,36 +49,12 @@ ini_set('log_errors', 0);
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 'stderr');
 
-$args = Garp_Cli::parseArgs($_SERVER['argv']);
+$golemRc = new Golem_Rc(APPLICATION_PATH.Golem_Toolkit::GOLEMRC);
+$golemToolkit = Golem_Toolkit::getInstance($golemRc);
+$success = $golemToolkit->main();
+Garp_Cli::halt($success);
 
-// Check .golemrc for cached settings
-$golemRc = new Golem_Rc(APPLICATION_PATH.Golem_Cli_Command_Sys::GOLEMRC);
-if (!$golemRc->isConfigurationComplete()) {
-	// First: make sure we have a working setup
-	$cmd = new Golem_Cli_Command_Sys();
-	$cmd->configure(array(
-		'all' => false
-	));
-}
-
-// Create application, bootstrap, and run
-$application = new Garp_Application(
-	APPLICATION_ENV, 
-	APPLICATION_PATH.'/configs/application.ini'
-);
-$application->bootstrap();
-// save the application in the registry, so it can be used by commands.
-Zend_Registry::set('application', $application);
-
-/**
- * Process the command
- */
-$args = Garp_Cli::parseArgs($_SERVER['argv']);
-if (empty($args[0])) {
-	Garp_Cli::errorOut('No command given.');
-	Garp_Cli::errorOut('Usage: php garp.php <command> [args,..]');
-	exit;
-}
+/////////////////////////
 
 /* Construct command classname */
 $classArgument = ucfirst($args[0]);

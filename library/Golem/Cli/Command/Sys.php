@@ -7,23 +7,16 @@
  * @version      1.0
  * @package      Golem_Cli_Command
  */
-class Golem_Cli_Command_Sys extends Garp_Cli_Command {
-	/**
- 	 * Relative location of .golemrc
- 	 * @var String
- 	 */
-	const GOLEMRC = '/data/.golemrc';
-
+class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 	/**
  	 * Configure .golemrc
  	 * @param Array $args 
- 	 * @return Void
+ 	 * @return Boolean
  	 */
 	public function configure(array $args = array()) {
 		// Devs can passing wether they wish to configure all values, or only missing ones.
-		$all = array_key_exists('all', $args) ? $args['all'] : true;
-
-		$golemRc = new Golem_Rc(APPLICATION_PATH.self::GOLEMRC);
+		$all = array_key_exists(0, $args) ? strtolower($args[0]) == 'all' : true;
+		$golemRc = $this->_toolkit->getRc();
 
 		$this->_welcome();
 		Garp_Cli::lineOut('Some required data is missing.');
@@ -43,6 +36,30 @@ class Golem_Cli_Command_Sys extends Garp_Cli_Command {
 			Garp_Cli::errorOut('There was trouble saving your .golemrc file. Make sure '.APPLICATION_PATH.'/data/ is writable.');
 			Garp_Cli::lineOut('For now we\'ll continue with uncached data. Next time you will have to configure golem again.');
 		}
+		Garp_Cli::lineOut('For help, run ', null, false);
+		Garp_Cli::lineOut('golem help ', Garp_Cli::BLUE, false);
+		Garp_Cli::lineOut('');
+		return true;
+	}
+
+	/**
+ 	 * Help those poor devs
+ 	 * @return Void
+ 	 */
+	public function help() {
+		$this->_welcome();
+
+		/**
+ 		 * @todo Wanneer je al in een project folder zit is onderstaande overbodig natuurlijk.
+ 		 */
+		$projects = $this->_toolkit->getProjects();		
+		Garp_Cli::lineOut('Here are your Garp projects:');
+		foreach ($projects as $project) {
+			Garp_Cli::lineOut(' - '.$project);
+		}
+		Garp_Cli::lineOut('');
+		Garp_Cli::lineOut('You can prepend your commands with the project name in order to execute them in the context of that project. For example:');
+		Garp_Cli::lineOut('golem '.$projects[0].' Admin Add', Garp_Cli::BLUE);
 	}
 
 	/**
@@ -52,5 +69,5 @@ class Golem_Cli_Command_Sys extends Garp_Cli_Command {
 	protected function _welcome() {
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('WELCOME TO GOLEM!', Garp_Cli::GREEN);
-	}		
+	}
 }

@@ -135,11 +135,18 @@ class Golem_Rc {
 
 	/**
  	 * Return the contents of .golemrc
+ 	 * @param String $key
  	 * @return Array
  	 */
-	public function getData() {
+	public function getData($key = null) {
 		if (!self::$_data) {
 			self::$_data = include $this->_file;
+		}
+		if ($key) {
+			if (!isset(self::$_data[$key])) {
+				throw new InvalidArgumentException("Key $key not found in GolemRc.");
+			}
+			return self::$_data[$key];
 		}
 		return self::$_data;
 	}
