@@ -12,7 +12,9 @@ class Golem_Rc {
  	 * Constants for data keys
  	 * @var String
  	 */
-	const WORKSPACE = 'workspace';
+	const WORKSPACE          = 'workspace';
+	const HOSTS_FILE         = 'hosts_file';
+	const APACHE_VHOSTS_FILE = 'apache_vhosts_file';
     /**#@-*/
 
 
@@ -21,7 +23,9 @@ class Golem_Rc {
  	 * @var Array
  	 */
 	protected $_questions = array(
-		self::WORKSPACE => 'What is your workspace?'
+		self::WORKSPACE => 'Where is your workspace?',
+		self::HOSTS_FILE => 'Where is your hosts file?',
+		self::APACHE_VHOSTS_FILE => 'Where is your vhosts file?',
 	);
 
 
@@ -71,21 +75,62 @@ class Golem_Rc {
 
 
 	/**
+ 	 * Check wether all keys are present. 
+ 	 * Handy for updating requirements.
+ 	 * @return Boolean
+ 	 */
+	public function isConfigurationComplete() {
+		if ($this->exists()) {
+			$data = $this->getData();
+			$existingKeys = array_keys($data);
+			$requiredKeys = array_keys($this->_questions);
+			return !count(array_diff($requiredKeys, $existingKeys));
+		}
+		return false;
+	}
+
+
+	/**
  	 * Prompt the user for the missing data
  	 * @param String $key Ask for a specific key
  	 * @return Void
  	 */
 	public function askForData($key = null) {
 		$data = array();
-		foreach ($this->_questions as $key => $question) {
+		// If key is given, append that key to existing data
+		if ($key && !empty($this->_questions[$key])) {
+			$data = self::$_data;
+			$question = $this->_questions[$key];
 			$value = Garp_Cli::prompt($question.' ('.$this->_defaults[$key].')');
 			if (!$value) {
 				$value = $this->_defaults[$key];
 			}
 			$data[$key] = $value;
+		} else {
+			foreach ($this->_questions as $key => $question) {
+				$value = Garp_Cli::prompt($question.' ('.$this->_defaults[$key].')');
+				if (!$value) {
+					$value = $this->_defaults[$key];
+				}
+				$data[$key] = $value;
+			}
 		}
 		self::$_data = $data;
 	}
+
+
+	/**
+ 	 * Ask only for missing data
+ 	 * @return Void
+ 	 */
+	public function askForMissingData() {
+		$existingKeys = array_keys(self::$_data);
+		$requiredKeys = array_keys($this->_questions);
+		$missingKeys = array_diff($requiredKeys, $existingKeys);
+		foreach ($missingKeys as $key) {
+			$this->askForData($key);
+		}
+	} 
 
 
 	/**
@@ -103,9 +148,13 @@ class Golem_Rc {
 	/**
  	 * Write config to the file.
  	 * @return Boolean
+ 	 * @todo Move array2phpStatement to utility class outside of Spawn namespace
  	 */
 	public function write() {
-		return file_put_contents($this->_file, self::$_data);
+		$phpArray = Garp_Model_Spawn_Util::array2phpStatement(self::$_data);
+		$phpReturnStatement  = "<?php\n";
+		$phpReturnStatement .= "return $phpArray;";
+		return file_put_contents($this->_file, $phpReturnStatement);
 	}
 
 
@@ -116,7 +165,9 @@ class Golem_Rc {
  	 */
 	protected function _setDefaults() {
 		$this->_defaults = array(
-			self::WORKSPACE => realpath(APPLICATION_PATH.'/../../')
+			self::WORKSPACE => realpath(APPLICATION_PATH.'/../../'),
+			self::HOSTS_FILE => '/etc/hosts',
+			self::APACHE_VHOSTS_FILE => '/etc/apache2/extra/httpd-vhosts.conf'
 		);
 	}
 }

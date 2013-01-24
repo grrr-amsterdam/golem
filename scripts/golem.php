@@ -37,42 +37,6 @@ if (!defined('APPLICATION_ENV')) {
 // een project is hier niet bij gebaat. Moet het dan al wel op dit punt gedaan worden?
 require_once($here.'/../garp/application/init.php');
 
-// Check .golemrc for cached settings
-// @todo Move this to the golem reconfigure command mentioned below.
-define('GOLEMRC', APPLICATION_PATH.'/data/.golemrc');
-$golemRc = new Golem_Rc(GOLEMRC);
-if (!$golemRc->exists()) {
-	// First timer, eh?
-	Garp_Cli::lineOut('');
-	Garp_Cli::lineOut('WELCOME TO GOLEM!');
-	Garp_Cli::lineOut('Since this is your first time, I\'m going to ask you a few simple questions.');
-	Garp_Cli::lineOut('Defaults are shown in parentheses.');
-	Garp_Cli::lineOut('');
-	$golemRc->askForData();
-	if ($golemRc->write()) {
-		Garp_Cli::lineOut('Your settings have been saved. If you ever want to reconfigure, simply run golem reconfigure');
-	} else {
-		Garp_Cli::errorOut('There was trouble saving your .golemrc file. Make sure '.APPLICATION_PATH.'/data/ is writable.');
-		Garp_Cli::lineOut('For now we\'ll continue with uncached data. Next time you will have to configure golem again.');
-	}
-}
-
-exit(0);
-
-
-
-
-
-
-// Create application, bootstrap, and run
-$application = new Garp_Application(
-	APPLICATION_ENV, 
-	APPLICATION_PATH.'/configs/application.ini'
-);
-$application->bootstrap();
-// save the application in the registry, so it can be used by commands.
-Zend_Registry::set('application', $application);
-
 /**
  * Report errors, since we're in CLI.
  * Note that log_errors = 1, which outputs to STDERR. display_errors however outputs to STDOUT. In a CLI
@@ -84,6 +48,27 @@ error_reporting(-1);
 ini_set('log_errors', 0);
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 'stderr');
+
+$args = Garp_Cli::parseArgs($_SERVER['argv']);
+
+// Check .golemrc for cached settings
+$golemRc = new Golem_Rc(APPLICATION_PATH.Golem_Cli_Command_Sys::GOLEMRC);
+if (!$golemRc->isConfigurationComplete()) {
+	// First: make sure we have a working setup
+	$cmd = new Golem_Cli_Command_Sys();
+	$cmd->configure(array(
+		'all' => false
+	));
+}
+
+// Create application, bootstrap, and run
+$application = new Garp_Application(
+	APPLICATION_ENV, 
+	APPLICATION_PATH.'/configs/application.ini'
+);
+$application->bootstrap();
+// save the application in the registry, so it can be used by commands.
+Zend_Registry::set('application', $application);
 
 /**
  * Process the command
