@@ -51,7 +51,12 @@ ini_set('display_errors', 'stderr');
 
 $golemRc = new Golem_Rc(APPLICATION_PATH.Golem_Toolkit::GOLEMRC);
 $golemToolkit = Golem_Toolkit::getInstance($golemRc);
-$success = $golemToolkit->main();
+try {
+	$success = $golemToolkit->main();
+} catch (Exception $e) {
+	$success = false;
+	Garp_Cli::errorOut($e->getMessage());
+}
 Garp_Cli::halt($success);
 
 /////////////////////////

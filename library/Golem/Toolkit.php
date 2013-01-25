@@ -107,6 +107,34 @@ class Golem_Toolkit {
 		if (empty($args)) {
 			return array('sys', 'help', array());
 		}
+
+		$cmd = null;
+		$action = null;
+		$cmdArgs = array();
+		
+		/**
+ 		 * If your current pwd is in a project, no projectname has to be specified, so 
+ 		 * your commands look like this:
+ 		 *  golem admin add
+ 		 * Otherwise, you must explicitly tell golem which project to use:
+ 		 *  golem grrr.nl admin add
+ 		 * This should explain the following array index distribution.
+ 		 * The values left in the array are sent as arguments.
+ 		 */
+		$cmdIndex = 1;
+		$actionIndex = 2;
+		if ($project = $this->getCurrentProject()) {
+			// We're in a project context
+			$cmdIndex = 0;
+			$actionIndex = 1;
+		}
+		if (empty($args[$cmdIndex])) {
+			throw new Golem_Exception_InvalidArgs('No command can be extracted from the given arguments.');
+		}
+		$cmd = $args[$cmdIndex];
+		$action = !empty($args[$actionIndex]) ? $args[$actionIndex] : 'main';
+		$cmdArgs = array_slice($args, $actionIndex);
+		return array($cmd, $action, $cmdArgs);
 	}
 
 
@@ -181,5 +209,22 @@ class Golem_Toolkit {
 		return file_exists($garpFolder) &&
 			file_exists($appFolder) &&
 			file_exists($publicFolder);
+	}
+
+
+	/**
+ 	 * Check if our current pwd is in a Garp project.
+ 	 * Right now only true if you're in the root of a project.
+ 	 * @todo Extend this, so you can execute golem from deep within a project directory?
+ 	 * @return String The name of the project, or Boolean if you're not inside a project dir.
+ 	 */
+	public function getCurrentProject() {
+		$pwd = getcwd();
+		$currFolder = basename($pwd);
+		$projects = $this->getProjects();
+		if (in_array($currFolder, $projects)) {
+			return $currFolder;
+		}
+		return false;
 	}
 }

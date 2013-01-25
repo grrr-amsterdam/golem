@@ -43,8 +43,25 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 	}
 
 	/**
+ 	 * This builds a project from scratch
+ 	 * @return Boolean
+ 	 */
+	public function build(array $args = array()) {
+		Garp_Cli::errorOut('@todo: implement this');
+		return true;
+	}
+
+	/**
+ 	 * Add a project to your workspace
+ 	 * @return Boolean
+ 	 */
+	public function checkout(array $args = array()) {
+		return true;
+	}
+
+	/**
  	 * Help those poor devs
- 	 * @return Void
+ 	 * @return Boolean
  	 */
 	public function help() {
 		$this->_welcome();
@@ -59,7 +76,10 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		}
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('You can prepend your commands with the project name in order to execute them in the context of that project. For example:');
-		Garp_Cli::lineOut('golem '.$projects[0].' Admin Add', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('golem '.$projects[0].' admin add', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Alternatively, execute a system-wide command:');
+		Garp_Cli::lineOut('golem sys checkout project grrr.nl', Garp_Cli::BLUE);
+		return true;
 	}
 
 	/**
