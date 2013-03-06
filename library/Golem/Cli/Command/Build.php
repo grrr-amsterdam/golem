@@ -14,10 +14,10 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 	 * @return Void
 	 */
 	public function main(array $args = array()) {
-		if (empty($args[1])) {
+		if (empty($args[0])) {
 			Garp_Cli::errorOut('Insufficient arguments.');
 			$this->help();
-		} elseif (strtolower($args[1]) === 'help') {
+		} elseif (strtolower($args[0]) === 'help') {
 			$this->help();
 			return;
 		} else {
@@ -29,9 +29,9 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 			} else {
 				$versionControl = 'git';
 			}
-			
-			$projectName = $args[1];
-			$projectRepo = isset($args[2]) ? $args[2] : null;
+
+			$projectName = $args[0];
+			$projectRepo = isset($args[1]) ? $args[1] : null;
 			$strategyClassName = 'Golem_Cli_Command_BuildProject_Strategy_'.ucfirst(strtolower($versionControl));
 			$strategy = new $strategyClassName($projectName, $projectRepo);
 			return $strategy->build();
@@ -41,6 +41,7 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 
 	/**
  	 * Help
+ 	 * @return Boolean
  	 */
 	public function help() {
 		Garp_Cli::lineOut('Usage:');
@@ -49,5 +50,6 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 		Garp_Cli::lineOut('For projects that use Subversion, add option --svn:');
 		Garp_Cli::lineOut(' golem build <projectname> <repository> --svn', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
+		return true;
 	}
 }

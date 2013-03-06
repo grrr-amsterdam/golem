@@ -76,9 +76,9 @@ class Golem_Toolkit {
 		if (!class_exists('Garp_Loader') && !class_exists('Garp_Cli')) {
 			require_once(GOLEM_APPLICATION_PATH.'/../library/Garp/Cli.php');
 		}
-		// Figure out the project, command, action and arguments
+		// Figure out the project, command and arguments
 		$args = Garp_Cli::parseArgs($_SERVER['argv']);
-		list($project, $cmd, $action, $args) = $this->_parseArgs($args);
+		list($project, $cmd, $args) = $this->_parseArgs($args);
 
 		$applicationEnv = $this->_determineApplicationEnv($args);
 		if (!$applicationEnv) {
@@ -103,9 +103,8 @@ class Golem_Toolkit {
 
 		// Save the application in the registry, so it can be used by commands.
 		Zend_Registry::set('application', $application);
-
-		// Last but not least, execute the action on the command.
-		$success = $this->executeCommand($cmd, $action, $args);
+		// Last but not least, execute the command.
+		$success = $this->executeCommand($cmd, $args);
 		return $success;
 	}
 
@@ -113,37 +112,35 @@ class Golem_Toolkit {
 	/**
  	 * Execute a Garp_Cli_Command.
  	 * @param Mixed $cmd Either a Garp_Cli_Command instance, or the suffix of its classname.
- 	 * @param String $action Which method to execute on the class
  	 * @param Array $args 
  	 * @return Boolean
  	 */
-	public function executeCommand($cmd, $action, array $args = array()) {
+	public function executeCommand($cmd, array $args = array()) {
 		if (!$cmd instanceof Garp_Cli_Command) {
 			$cmd = $this->getCommandClass($cmd);
 		}
-		$response = $cmd->{$action}($args);
+		$response = $cmd->main($args);
 		return $response;
 	}
 
 
 	/**
- 	 * Parse commandline arguments into cmd - action pairs
+ 	 * Parse commandline arguments into project, command and arguments
  	 * @param Array $args 
-	 * @return Array Containing (0) Project name, (1) Cmd name, (2) Action name, (3) Arguments
+	 * @return Array Containing (0) Project name, (1) Cmd name, (2) Arguments
  	 */
 	protected function _parseArgs(array $args) {
 		if (empty($args)) {
-			return array(null, 'sys', 'help', array());
+			return array(null, 'sys', array('help'));
 		}
 
-		$project = $cmd = $action = null;
+		$project = $cmd = null;
 		$cmdArgs = array();
 
 		// Pwd is not in a project: project needs to be index 0
 		// Example: golem grrr.nl admin add
 		$projectIndex = 0;
 		$cmdIndex = 1;
-		$actionIndex = 2;
 		$isSysCommand = array_key_exists(0, $args) && $this->isSysCommand($args[0]);
 		if (($project = $this->getCurrentProject()) || $isSysCommand) {
 			// Pwd is in a project: project is irrelevant and cmd needs to be index 0.
@@ -151,7 +148,6 @@ class Golem_Toolkit {
 			// Example: golem admin add
 			$projectIndex = -1;
 			$cmdIndex = 0;
-			$actionIndex = 1;
 		}
 
 		if (empty($args[$cmdIndex])) {
@@ -162,9 +158,8 @@ class Golem_Toolkit {
 			$project = $args[$projectIndex];
 		}
 		$cmd     = $args[$cmdIndex];
-		$action  = !empty($args[$actionIndex]) ? $args[$actionIndex] : 'main';
-		$cmdArgs = array_slice($args, $actionIndex+1);
-		return array($project, $cmd, $action, $cmdArgs);
+		$cmdArgs = array_slice($args, $cmdIndex+1);
+		return array($project, $cmd, $cmdArgs);
 	}
 
 
@@ -172,10 +167,17 @@ class Golem_Toolkit {
  	 * Load command class
  	 * @param String $cmd Suffix of the command
  	 * @return Garp_Cli_Command
+ 	 * @todo Should a sys command always come from GOLEM_APPLICATION_PATH?
+ 	 * @todo Another implication: in a project, you always execute the local version of the command. Shouldn't that be Golem's version?
  	 */
 	public function getCommandClass($cmd) {
 		$cmdClassName = 'Cli_Command_'.ucfirst(strtolower($cmd));
-		$prefixes = array('App', 'Golem', 'Garp');
+		$prefixes = array('App');
+		// Only try the Golem prefix if the Golem dir is actually there.
+		if (is_dir(APPLICATION_PATH.'/../library/Golem')) {
+			$prefixes[] = 'Golem';
+		}
+		$prefixes[] = 'Garp';
 		$garpLoader = Garp_Loader::getInstance();
 		foreach ($prefixes as $prefix) {
 			$fullCmdClassName = $prefix.'_'.$cmdClassName;
@@ -187,7 +189,8 @@ class Golem_Toolkit {
 				return $cmd;
 			}
 		}
-		$this->_throwException('InvalidCmd', 'Command '.$cmd.' not found in any of the available namespaces.');
+		$this->_throwException('InvalidCmd', 'Command '.$cmd.' not found '.
+			'in any of the available namespaces. ('.implode(',', $prefixes).')');
 	}
 
 
@@ -210,7 +213,7 @@ class Golem_Toolkit {
 		$this->_rc = $golemRc;
 		if (!$golemRc->isConfigurationComplete()) {
 			// make sure we have a working setup
-			$success = $this->executeCommand('sys', 'configure');
+			$success = $this->executeCommand('sys', array('configure'));
 			// @todo Is it right to exit here? If a developer was executing a command, he needs to do it again.
 			Garp_Cli::halt($success);
 		}
@@ -316,14 +319,13 @@ class Golem_Toolkit {
 	protected function _determineApplicationEnv(&$args) {
 		// Check if APPLICATION_ENV is passed along as an argument.
 		foreach ($args as $key => $arg) {
-			if ($key == 'APPLICATION_ENV' || $key == 'e') {
+			if ($key === 'APPLICATION_ENV' || $key === 'e') {
 				$env = $args[$key];
 				// Remove APPLICATION_ENV from the arguments list
 				unset($args[$key]);
 				return $env;
 			}
 		}
-
 		// Not found as argument? Let's see if it's defined as environment variable
 		if (getenv('APPLICATION_ENV')) {
 			return getenv('APPLICATION_ENV');

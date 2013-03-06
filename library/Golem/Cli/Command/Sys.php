@@ -74,8 +74,13 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		return true;
 	}
 
+	/**
+ 	 * Just to see if command routing works.
+ 	 * @return Boolean
+ 	 */
 	public function test() {
 		Garp_Cli::lineOut('Golem reached method '.__METHOD__);
+		return true;
 	}
 
 	/**
