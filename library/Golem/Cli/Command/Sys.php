@@ -14,7 +14,7 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
  	 * @return Boolean
  	 */
 	public function configure(array $args = array()) {
-		// Devs can passing wether they wish to configure all values, or only missing ones.
+		// Devs can pass wether they wish to configure all values, or only missing ones.
 		$all = array_key_exists(0, $args) ? strtolower($args[0]) == 'all' : true;
 		$golemRc = $this->_toolkit->getRc();
 
@@ -43,19 +43,11 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 	}
 
 	/**
- 	 * This builds a project from scratch
- 	 * @return Boolean
- 	 */
-	public function build(array $args = array()) {
-		Garp_Cli::errorOut('@todo: implement this');
-		return true;
-	}
-
-	/**
  	 * Add a project to your workspace
  	 * @return Boolean
  	 */
 	public function checkout(array $args = array()) {
+		$project = $args[0];
 		return true;
 	}
 
@@ -78,8 +70,12 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		Garp_Cli::lineOut('You can prepend your commands with the project name in order to execute them in the context of that project. For example:');
 		Garp_Cli::lineOut('golem '.$projects[0].' admin add', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('Alternatively, execute a system-wide command:');
-		Garp_Cli::lineOut('golem sys checkout project grrr.nl', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('golem checkout grrr.nl', Garp_Cli::BLUE);
 		return true;
+	}
+
+	public function test() {
+		Garp_Cli::lineOut('Golem reached method '.__METHOD__);
 	}
 
 	/**

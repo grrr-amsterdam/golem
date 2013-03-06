@@ -36,6 +36,15 @@ class Golem_Toolkit {
 
 
 	/**
+ 	 * Commands that do not act upon an existing project
+ 	 * @var Array
+ 	 */
+	protected static $_sysCommands = array(
+		'sys', 'build', 'checkout'
+	);
+
+
+	/**
  	 * Singleton interface
  	 * @param Golem_Rc $golemRc
  	 * @return Golem_Toolkit
@@ -63,19 +72,39 @@ class Golem_Toolkit {
  	 * @return Boolean Wether the command was processed successfully.
  	 */
 	public function main() {
-		// Create application, bootstrap, and run
-		$application = new Garp_Application(
-			APPLICATION_ENV, 
-			APPLICATION_PATH.'/configs/application.ini'
-		);
+		// Autoloading is presumably not yet setup at this point. Manually include Garp_Cli.
+		if (!class_exists('Garp_Loader') && !class_exists('Garp_Cli')) {
+			require_once(GOLEM_APPLICATION_PATH.'/../library/Garp/Cli.php');
+		}
+		// Figure out the project, command, action and arguments
+		$args = Garp_Cli::parseArgs($_SERVER['argv']);
+		list($project, $cmd, $action, $args) = $this->_parseArgs($args);
+
+		$applicationEnv = $this->_determineApplicationEnv($args);
+		if (!$applicationEnv) {
+			$this->_throwException('MissingEnvironment', 'APPLICATION_ENV is not set. Please set it as a shell variable or pass it along as an argument, like so: --e=development');
+		}
+		define('APPLICATION_ENV', $applicationEnv);
+
+ 		// The following makes sure the right configuration is used for a given project.
+		$garpInitPath = GOLEM_APPLICATION_PATH.'/../garp/application/init.php';
+		if ($project) {
+			if ($this->getCurrentProject() != $project) {
+				$this->enterProject($project);
+			}
+			$garpInitPath = 'garp/application/init.php';
+		}
+		// Note: constants such as APPLICATION_PATH are set from the init file.
+		require_once($garpInitPath);
+
+		// Create application and bootstrap
+		$application = new Garp_Application(APPLICATION_ENV, APPLICATION_PATH.'/configs/application.ini');
 		$application->bootstrap();
 
 		// Save the application in the registry, so it can be used by commands.
 		Zend_Registry::set('application', $application);
 
-		// Process the command
-		$args = Garp_Cli::parseArgs($_SERVER['argv']);
-		list($cmd, $action, $args) = $this->_parseArgs($args);
+		// Last but not least, execute the action on the command.
 		$success = $this->executeCommand($cmd, $action, $args);
 		return $success;
 	}
@@ -90,8 +119,7 @@ class Golem_Toolkit {
  	 */
 	public function executeCommand($cmd, $action, array $args = array()) {
 		if (!$cmd instanceof Garp_Cli_Command) {
-			$cmdClassName = 'Golem_Cli_Command_'.ucfirst(strtolower($cmd));
-			$cmd = new $cmdClassName($this);
+			$cmd = $this->getCommandClass($cmd);
 		}
 		$response = $cmd->{$action}($args);
 		return $response;
@@ -101,40 +129,75 @@ class Golem_Toolkit {
 	/**
  	 * Parse commandline arguments into cmd - action pairs
  	 * @param Array $args 
-	 * @return Array Containing (0) Cmd name, (1) Action name, (2) Arguments
+	 * @return Array Containing (0) Project name, (1) Cmd name, (2) Action name, (3) Arguments
  	 */
 	protected function _parseArgs(array $args) {
 		if (empty($args)) {
-			return array('sys', 'help', array());
+			return array(null, 'sys', 'help', array());
 		}
 
-		$cmd = null;
-		$action = null;
+		$project = $cmd = $action = null;
 		$cmdArgs = array();
-		
-		/**
- 		 * If your current pwd is in a project, no projectname has to be specified, so 
- 		 * your commands look like this:
- 		 *  golem admin add
- 		 * Otherwise, you must explicitly tell golem which project to use:
- 		 *  golem grrr.nl admin add
- 		 * This should explain the following array index distribution.
- 		 * The values left in the array are sent as arguments.
- 		 */
+
+		// Pwd is not in a project: project needs to be index 0
+		// Example: golem grrr.nl admin add
+		$projectIndex = 0;
 		$cmdIndex = 1;
 		$actionIndex = 2;
-		if ($project = $this->getCurrentProject()) {
-			// We're in a project context
+		$isSysCommand = array_key_exists(0, $args) && $this->isSysCommand($args[0]);
+		if (($project = $this->getCurrentProject()) || $isSysCommand) {
+			// Pwd is in a project: project is irrelevant and cmd needs to be index 0.
+			// Sys commands also do not require a project because they act upon the entire workspace.
+			// Example: golem admin add
+			$projectIndex = -1;
 			$cmdIndex = 0;
 			$actionIndex = 1;
 		}
+
 		if (empty($args[$cmdIndex])) {
-			throw new Golem_Exception_InvalidArgs('No command can be extracted from the given arguments.');
+			$this->_throwException('InvalidArgs', 'No command can be extracted from the given arguments.');
 		}
-		$cmd = $args[$cmdIndex];
-		$action = !empty($args[$actionIndex]) ? $args[$actionIndex] : 'main';
-		$cmdArgs = array_slice($args, $actionIndex);
-		return array($cmd, $action, $cmdArgs);
+
+		if ($projectIndex !== -1) {
+			$project = $args[$projectIndex];
+		}
+		$cmd     = $args[$cmdIndex];
+		$action  = !empty($args[$actionIndex]) ? $args[$actionIndex] : 'main';
+		$cmdArgs = array_slice($args, $actionIndex+1);
+		return array($project, $cmd, $action, $cmdArgs);
+	}
+
+
+	/**
+ 	 * Load command class
+ 	 * @param String $cmd Suffix of the command
+ 	 * @return Garp_Cli_Command
+ 	 */
+	public function getCommandClass($cmd) {
+		$cmdClassName = 'Cli_Command_'.ucfirst(strtolower($cmd));
+		$prefixes = array('App', 'Golem', 'Garp');
+		$garpLoader = Garp_Loader::getInstance();
+		foreach ($prefixes as $prefix) {
+			$fullCmdClassName = $prefix.'_'.$cmdClassName;
+			if ($garpLoader->isLoadable($fullCmdClassName)) {
+				$cmd = new $fullCmdClassName($this);
+				if (!$cmd instanceof Garp_Cli_Command) {
+					$this->_throwException('InvalidCmd', 'Command '.$cmd.' must be of type Garp_Cli_Command');
+				}
+				return $cmd;
+			}
+		}
+		$this->_throwException('InvalidCmd', 'Command '.$cmd.' not found in any of the available namespaces.');
+	}
+
+
+	/**
+ 	 * Check if given command is sys command (a command that does not act upon a project).
+ 	 * @param String $cmd
+ 	 * @return Boolean
+ 	 */
+	public function isSysCommand($cmd) {
+		return in_array($cmd, self::$_sysCommands);
 	}
 
 
@@ -144,13 +207,13 @@ class Golem_Toolkit {
  	 * @return Void
  	 */
 	public function setRc(Golem_Rc $golemRc) {
+		$this->_rc = $golemRc;
 		if (!$golemRc->isConfigurationComplete()) {
 			// make sure we have a working setup
 			$success = $this->executeCommand('sys', 'configure');
-			// @todo Is it right to exit here? It feels cleaner to do the setup, then exit, then execute the original command.
+			// @todo Is it right to exit here? If a developer was executing a command, he needs to do it again.
 			Garp_Cli::halt($success);
 		}
-		$this->_rc = $golemRc;
 	}
 
 
@@ -184,11 +247,12 @@ class Golem_Toolkit {
 		$projects = array();
 		$dirIterator = new DirectoryIterator($workspace);
 		foreach ($dirIterator as $fileInfo) {
-			if ($fileInfo->isDir()) {
-				$projectPath = $fileInfo->getPath().DIRECTORY_SEPARATOR.$fileInfo->getFilename();
-				if ($this->_isGarpProject($projectPath)) {
-					$projects[] = $fileInfo->getFilename();
-				}
+			if (!$fileInfo->isDir()) {
+				continue;
+			}
+			$projectPath = $fileInfo->getPath().DIRECTORY_SEPARATOR.$fileInfo->getFilename();
+			if ($this->_isGarpProject($projectPath)) {
+				$projects[] = $fileInfo->getFilename();
 			}
 		}
 		return $projects;
@@ -226,5 +290,62 @@ class Golem_Toolkit {
 			return $currFolder;
 		}
 		return false;
+	}
+
+
+	/**
+ 	 * Cd into the given project.
+ 	 * @param String $project
+ 	 * @return Void
+ 	 */
+	public function enterProject($project) {
+		$workspace = $this->_rc->getData(Golem_Rc::WORKSPACE);
+		$projectPath = $workspace.DIRECTORY_SEPARATOR.$project;
+		if (!is_dir($projectPath)) {
+			$this->_throwException('InvalidProject', 'Unable to enter project '.$project);
+		}
+		chdir($projectPath);
+	}
+
+
+	/**
+ 	 * Figure out the current APPLICATION_ENV
+ 	 * @param Array $args The arguments as parsed by self::_parseArgs()
+ 	 * @return String The environment
+ 	 */
+	protected function _determineApplicationEnv(&$args) {
+		// Check if APPLICATION_ENV is passed along as an argument.
+		foreach ($args as $key => $arg) {
+			if ($key == 'APPLICATION_ENV' || $key == 'e') {
+				$env = $args[$key];
+				// Remove APPLICATION_ENV from the arguments list
+				unset($args[$key]);
+				return $env;
+			}
+		}
+
+		// Not found as argument? Let's see if it's defined as environment variable
+		if (getenv('APPLICATION_ENV')) {
+			return getenv('APPLICATION_ENV');
+		}
+
+		// Still nothing? That's not right...
+		return null;
+	}
+
+
+	/**
+ 	 * Throw an exception.
+ 	 * Use this method to throw exception, it will make sure the exception class is loaded.
+ 	 * (we cannot assume autoloading is setup at this point)
+ 	 * @param String $type Type of exception (And class suffix)
+ 	 * @param String $err Error message
+ 	 * @return Void 
+ 	 * @throws Golem_Exception
+ 	 */
+	protected function _throwException($type, $err) {
+		$className = 'Golem_Exception_'.$type;
+		require_once(GOLEM_APPLICATION_PATH.'/../library/Golem/Exception/'.$type.'.php');
+		throw new $className($err);
 	}
 }

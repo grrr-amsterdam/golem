@@ -172,7 +172,7 @@ class Golem_Rc {
  	 */
 	protected function _setDefaults() {
 		$this->_defaults = array(
-			self::WORKSPACE => realpath(APPLICATION_PATH.'/../../'),
+			self::WORKSPACE => realpath(GOLEM_APPLICATION_PATH.'/../../'),
 			self::HOSTS_FILE => '/etc/hosts',
 			self::APACHE_VHOSTS_FILE => '/etc/apache2/extra/httpd-vhosts.conf'
 		);
