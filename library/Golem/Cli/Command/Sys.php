@@ -43,15 +43,6 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 	}
 
 	/**
- 	 * Add a project to your workspace
- 	 * @return Boolean
- 	 */
-	public function checkout(array $args = array()) {
-		$project = $args[0];
-		return true;
-	}
-
-	/**
  	 * Help those poor devs
  	 * @return Boolean
  	 */

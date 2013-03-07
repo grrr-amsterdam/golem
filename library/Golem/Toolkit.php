@@ -40,7 +40,7 @@ class Golem_Toolkit {
  	 * @var Array
  	 */
 	protected static $_sysCommands = array(
-		'sys', 'build', 'checkout'
+		'sys', 'build', 'checkout', 'vhost'
 	);
 
 
@@ -156,6 +156,8 @@ class Golem_Toolkit {
 
 		if ($projectIndex !== -1) {
 			$project = $args[$projectIndex];
+			// Play nice with developers - this way they can tab-complete the projectname:
+			$project = rtrim($project, DIRECTORY_SEPARATOR);
 		}
 		$cmd     = $args[$cmdIndex];
 		$cmdArgs = array_slice($args, $cmdIndex+1);

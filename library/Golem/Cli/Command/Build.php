@@ -11,15 +11,16 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 	/**
 	 * Central start method
 	 * @param Array $args Various options. Must contain;
-	 * @return Void
+	 * @return Boolean
 	 */
 	public function main(array $args = array()) {
 		if (empty($args[0])) {
 			Garp_Cli::errorOut('Insufficient arguments.');
 			$this->help();
+			return false;
 		} elseif (strtolower($args[0]) === 'help') {
 			$this->help();
-			return;
+			return true;
 		} else {
 			// make sure we're in the right directory
 			chdir($this->_toolkit->getRc()->getData(Golem_Rc::WORKSPACE));
