@@ -16,7 +16,6 @@ interface Golem_Cli_Command_BuildProject_Strategy_Interface {
  	 */
 	public function __construct($projectName, $repository = null);
 
-
 	/**
  	 * Build all the things
  	 * @return Void

@@ -12,28 +12,24 @@ class Golem_Toolkit {
  	 * Relative location of .golemrc
  	 * @var String
  	 */
-	const GOLEMRC = '/data/.golemrc';
-
+	const GOLEMRC = '/data/.golemrc'; 
 
 	/**
  	 * @var Golem_Toolkit
  	 */
-	protected static $_instance;
-
+	protected static $_instance; 
 
 	/**
  	 * Golem configuration
  	 * @var Golem_Rc
  	 */
-	protected $_rc;
-
+	protected $_rc; 
 
 	/**
  	 * Project folders
  	 * @var Array
  	 */
-	protected $_projects;
-
+	protected $_projects; 
 
 	/**
  	 * Commands that do not act upon an existing project
@@ -41,8 +37,7 @@ class Golem_Toolkit {
  	 */
 	protected static $_sysCommands = array(
 		'sys', 'build', 'checkout', 'vhost'
-	);
-
+	); 
 
 	/**
  	 * Singleton interface
@@ -54,8 +49,7 @@ class Golem_Toolkit {
 			self::$_instance = new Golem_Toolkit($golemRc);
 		}
 		return self::$_instance;
-	}
-
+	} 
 
 	/**
  	 * Class constructor
@@ -64,8 +58,7 @@ class Golem_Toolkit {
  	 */
 	protected function __construct(Golem_Rc $golemRc) {
 		$this->setRc($golemRc);
-	}
-
+	} 
 
 	/**
  	 * Main startup method
@@ -106,8 +99,7 @@ class Golem_Toolkit {
 		// Last but not least, execute the command.
 		$success = $this->executeCommand($cmd, $args);
 		return $success;
-	}
-
+	} 
 
 	/**
  	 * Execute a Garp_Cli_Command.
@@ -121,8 +113,7 @@ class Golem_Toolkit {
 		}
 		$response = $cmd->main($args);
 		return $response;
-	}
-
+	} 
 
 	/**
  	 * Parse commandline arguments into project, command and arguments
@@ -162,15 +153,13 @@ class Golem_Toolkit {
 		$cmd     = $args[$cmdIndex];
 		$cmdArgs = array_slice($args, $cmdIndex+1);
 		return array($project, $cmd, $cmdArgs);
-	}
-
+	} 
 
 	/**
  	 * Load command class
  	 * @param String $cmd Suffix of the command
  	 * @return Garp_Cli_Command
  	 * @todo Should a sys command always come from GOLEM_APPLICATION_PATH?
- 	 * @todo Another implication: in a project, you always execute the local version of the command. Shouldn't that be Golem's version?
  	 */
 	public function getCommandClass($cmd) {
 		$cmdClassName = 'Cli_Command_'.ucfirst(strtolower($cmd));
@@ -193,8 +182,7 @@ class Golem_Toolkit {
 		}
 		$this->_throwException('InvalidCmd', 'Command '.$cmd.' not found '.
 			'in any of the available namespaces. ('.implode(',', $prefixes).')');
-	}
-
+	} 
 
 	/**
  	 * Check if given command is sys command (a command that does not act upon a project).
@@ -203,8 +191,7 @@ class Golem_Toolkit {
  	 */
 	public function isSysCommand($cmd) {
 		return in_array($cmd, self::$_sysCommands);
-	}
-
+	} 
 
 	/**
  	 * Set which Golem_Rc to use.
@@ -219,8 +206,7 @@ class Golem_Toolkit {
 			// @todo Is it right to exit here? If a developer was executing a command, he needs to do it again.
 			Garp_Cli::halt($success);
 		}
-	}
-
+	} 
 
 	/**
  	 * Get GolemRc
@@ -228,8 +214,7 @@ class Golem_Toolkit {
  	 */
 	public function getRc() {
 		return $this->_rc;
-	}
-
+	} 
 
 	/**
  	 * Get Garp projects
@@ -240,8 +225,7 @@ class Golem_Toolkit {
 			$this->_projects = $this->_collectProjectList();
 		}
 		return $this->_projects;
-	}
-
+	} 
 
 	/**
  	 * Iterate workspace directory to gather project folders.
@@ -261,8 +245,7 @@ class Golem_Toolkit {
 			}
 		}
 		return $projects;
-	}
-
+	} 
 
 	/**
  	 * Check if a given path is a Garp project.
@@ -278,8 +261,7 @@ class Golem_Toolkit {
 		return file_exists($garpFolder) &&
 			file_exists($appFolder) &&
 			file_exists($publicFolder);
-	}
-
+	} 
 
 	/**
  	 * Check if our current pwd is in a Garp project.
@@ -295,8 +277,7 @@ class Golem_Toolkit {
 			return $currFolder;
 		}
 		return false;
-	}
-
+	} 
 
 	/**
  	 * Cd into the given project.
@@ -310,8 +291,7 @@ class Golem_Toolkit {
 			$this->_throwException('InvalidProject', 'Unable to enter project '.$project);
 		}
 		chdir($projectPath);
-	}
-
+	} 
 
 	/**
  	 * Figure out the current APPLICATION_ENV
@@ -335,8 +315,7 @@ class Golem_Toolkit {
 
 		// Still nothing? That's not right...
 		return null;
-	}
-
+	} 
 
 	/**
  	 * Throw an exception.

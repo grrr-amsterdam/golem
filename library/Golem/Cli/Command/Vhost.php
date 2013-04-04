@@ -27,13 +27,13 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 
 		// Modify vhosts file
 		Garp_Cli::lineOut('Adding vhost tag for '.$project.'.');
-		$vhostTag = $this->getVhostTag($localUrl, $webroot);
+		$vhostTag = $this->_getVhostTag($localUrl, $webroot);
 		$vhostAppendCmd = $this->_getAppendCmd($vhostTag, $vhostsFile);
 		$this->_sudoExec($vhostAppendCmd);
 
 		// Modify hosts file
 		Garp_Cli::lineOut('Adding '.$localUrl.' to hosts file.');
-		$hostLine = $this->getHostsDeclaration($localUrl);
+		$hostLine = $this->_getHostsDeclaration($localUrl);
 		$hostLineAppendCmd = $this->_getAppendCmd($hostLine, $hostsFile);
 		$this->_sudoExec($hostLineAppendCmd);
 
@@ -62,7 +62,7 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
  	 * @param String $webroot
  	 * @return String
  	 */
-	public function getVhostTag($localUrl, $webroot) {
+	protected function _getVhostTag($localUrl, $webroot) {
 		$template  = "\n<VirtualHost *:80>\n";
 		$template .= "ServerName %s\n";
 		$template .= "DocumentRoot %s\n";
@@ -78,7 +78,7 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 	 * @param String $url description
 	 * @return String
 	 */
-	public function getHostsDeclaration($url) {
+	protected function _getHostsDeclaration($url) {
 		$hostsEntry = "127.0.0.1    $url";
 		return $hostsEntry;
 	}
@@ -101,5 +101,16 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 		// clean up temp file
 		unlink($tmpFilePath);
 		return $shellResponse;
+	}
+
+	/**
+ 	 * Help
+ 	 * @return Boolean
+ 	 */
+	public function help() {
+		Garp_Cli::lineOut('Usage:');
+		Garp_Cli::lineOut(' golem vhost add <projectname> <local-url>', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('');
+		return true;
 	}
 }

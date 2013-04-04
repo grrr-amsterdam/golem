@@ -50,7 +50,7 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		$this->_welcome();
 
 		/**
- 		 * @todo Wanneer je al in een project folder zit is onderstaande overbodig natuurlijk.
+ 		 * @todo When you're already inside a project you probably don't need a list of projects
  		 */
 		$projects = $this->_toolkit->getProjects();		
 		Garp_Cli::lineOut('Here are your Garp projects:');

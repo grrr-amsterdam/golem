@@ -14,13 +14,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 	 */
 	const GARP3_REPO = 'https://svn.grrr.nl/garp3/code/branches/3_5/garp';
 	
-	
 	/**
 	 * Zend Framework repository
 	 * @var String
 	 */
 	const ZEND_REPO = 'http://framework.zend.com/svn/framework/standard/trunk/library/Zend';
-
 
 	/**
  	 * Project name
@@ -28,20 +26,17 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
  	 */
 	protected $_projectName;
 
-
 	/**
  	 * Project repository
  	 * @var String
  	 */
-	protected $_projectRepository;
-
+	protected $_projectRepository; 
 
 	/**
  	 * Project root
  	 * @var String
  	 */
-	protected $_projectRoot;
-
+	protected $_projectRoot; 
 
 	/**
  	 * Class constructor
@@ -55,8 +50,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		$this->_projectName = $projectName;
 		$this->_projectRepository = $repository;
 		$this->_projectRoot = getcwd().'/'.$projectName;
-	}
-
+	} 
 
 	/**
  	 * Build all the things
@@ -132,8 +126,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		passthru('svn export garp/scripts/scaffold/__MANIFEST.md __MANIFEST.md');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
-	}
-
+	} 
 
 	/**
 	 * Export Zend framework repository
@@ -145,8 +138,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		passthru('svn add library/Zend');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
-	}
-
+	} 
 	
 	/**
 	 * Create symlinks
@@ -168,7 +160,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('');
 	}
 	
-	
 	/**
 	 * Fix permissions
 	 * @return Void
@@ -185,7 +176,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
-	
 	
 	/**
  	 * Miscellaneous maintenance functions
@@ -207,8 +197,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Svn implements Golem_Cli_Command_B
 		passthru('svn ps svn:ignore \'*\' public/cached');
 		passthru('svn ps svn:ignore \'.sass-cache\' public/css');
 		passthru('svn ps svn:ignore \'*\' public/uploads/sandbox');
-	}
-	
+	} 
 
 	/**
 	 * There is some copied code in Garp_Db_Table_Row from Zend_Db_Table_Row_Abstract 

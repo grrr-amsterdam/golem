@@ -18,25 +18,25 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 			Garp_Cli::errorOut('Insufficient arguments.');
 			$this->help();
 			return false;
-		} elseif (strtolower($args[0]) === 'help') {
+		}
+		if (strtolower($args[0]) === 'help') {
 			$this->help();
 			return true;
-		} else {
-			// make sure we're in the right directory
-			chdir($this->_toolkit->getRc()->getData(Golem_Rc::WORKSPACE));
-			
-			if (array_key_exists('svn', $args)) {
-				$versionControl = 'svn';
-			} else {
-				$versionControl = 'git';
-			}
-
-			$projectName = $args[0];
-			$projectRepo = isset($args[1]) ? $args[1] : null;
-			$strategyClassName = 'Golem_Cli_Command_BuildProject_Strategy_'.ucfirst(strtolower($versionControl));
-			$strategy = new $strategyClassName($projectName, $projectRepo);
-			return $strategy->build();
 		}
+		// make sure we're in the right directory
+		chdir($this->_toolkit->getRc()->getData(Golem_Rc::WORKSPACE));
+		
+		if (array_key_exists('svn', $args)) {
+			$versionControl = 'svn';
+		} else {
+			$versionControl = 'git';
+		}
+
+		$projectName = $args[0];
+		$projectRepo = isset($args[1]) ? $args[1] : null;
+		$strategyClassName = 'Golem_Cli_Command_BuildProject_Strategy_'.ucfirst(strtolower($versionControl));
+		$strategy = new $strategyClassName($projectName, $projectRepo);
+		return $strategy->build();
 	}
 
 

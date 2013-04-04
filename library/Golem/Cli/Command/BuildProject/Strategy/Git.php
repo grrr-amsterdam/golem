@@ -3,19 +3,8 @@
  * Golem_Cli_Command_BuildProject_Git
  * Build project using Git
  *
- * @author       $Author: harmen $
- * @modifiedby   $LastChangedBy: harmen $
- * @version      $LastChangedRevision: 6540 $
- * @package      Golem
- * @subpackage   BuildProject
- * @lastmodified $LastChangedDate: 2012-10-10 10:16:37 +0200 (Wed, 10 Oct 2012) $
- */
-/**
- * Golem_Cli_Command_BuildProject_Git
- * Build project using Git
- *
  * @author       Harmen Janssen | grrr.nl
- * @version      1.0
+ * @version      1.1
  * @package      Golem_Cli_Command_BuildProject
  */
 class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_BuildProject_Strategy_Interface {
@@ -25,13 +14,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	 */
 	const GARP3_REPO = 'git@flow.grrr.nl:garp3';
 	
-	
 	/**
 	 * Zend Framework repository
 	 * @var String
 	 */
 	const ZEND_REPO = 'http://framework.zend.com/svn/framework/standard/trunk/library/Zend';
-
 
 	/**
  	 * Project name
@@ -39,20 +26,17 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 */
 	protected $_projectName;
 
-
 	/**
  	 * Project repository
  	 * @var String
  	 */
-	protected $_projectRepository;
-
+	protected $_projectRepository; 
 
 	/**
  	 * Project root
  	 * @var String
  	 */
 	protected $_projectRoot;
-
 
 	/**
  	 * Class constructor
@@ -67,7 +51,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		$this->_projectRepository = $repository;
 		$this->_projectRoot = getcwd().'/'.$projectName;
 	}
-
 
 	/**
  	 * Build all the things
@@ -90,7 +73,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 			chdir($this->_projectRoot);
 
 			$this->_setupGarp();
-			$this->_setupGarpSubmodules();
 			$this->_createScaffolding();
 			$this->_checkOutZend();
 			$this->_createSymlinks();
@@ -99,8 +81,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 
 			Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
 		}
-	}
-
+	} 
 
 	/**
  	 * Check out project repo
@@ -112,7 +93,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('');		
 	}
 
-
 	/**
  	 * Setup Garp submodule
  	 */
@@ -122,21 +102,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
-
-
-	/**
- 	 * Setup submodules inside Garp (such as the Facebook SDK).
- 	 */
-	protected function _setupGarpSubmodules() {
-		Garp_Cli::lineOut(' # Setting up submodules in Garp');
-		chdir('garp');
-		passthru('git submodule init');
-		passthru('git submodule update');
-		chdir($this->_projectRoot);
-		Garp_Cli::lineOut('Done.');		
-		Garp_Cli::lineOut('');
-	}
-
 
 	/**
  	 * Create project scaffolding
@@ -156,7 +121,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('');
 	}
 
-
 	/**
  	 * Checkout Zend library
  	 */
@@ -167,7 +131,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
-
 
 	/**
  	 * Create symlinks
@@ -187,8 +150,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		passthru('ln -s ../../../../shared/uploads public/uploads/shared');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
-	}
-
+	} 
 
 	/**
  	 * Set write permissions on certain folders
@@ -203,7 +165,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
-
 
 	/**
  	 * Add files to git, and add some files to .gitignore
