@@ -82,9 +82,7 @@ class Golem_Toolkit {
  		// The following makes sure the right configuration is used for a given project.
 		$garpInitPath = GOLEM_APPLICATION_PATH.'/../garp/application/init.php';
 		if ($project) {
-			if ($this->getCurrentProject() != $project) {
-				$this->enterProject($project);
-			}
+			$this->enterProject($project);
 			$garpInitPath = 'garp/application/init.php';
 		}
 		// Note: constants such as APPLICATION_PATH are set from the init file.
@@ -266,13 +264,19 @@ class Golem_Toolkit {
 	/**
  	 * Check if our current pwd is in a Garp project.
  	 * Right now only true if you're in the root of a project.
- 	 * @todo Extend this, so you can execute golem from deep within a project directory?
  	 * @return String The name of the project, or Boolean if you're not inside a project dir.
  	 */
 	public function getCurrentProject() {
 		$pwd = getcwd();
 		$currFolder = basename($pwd);
 		$projects = $this->getProjects();
+
+		// Traverse upwards until we're at the root. This way we can determine
+		// the project even from deep within.
+		while (!in_array($currFolder, $projects) && $pwd !== '/') {
+			$pwd = realpath($pwd.DIRECTORY_SEPARATOR.'..');
+			$currFolder = basename($pwd);
+		}
 		if (in_array($currFolder, $projects)) {
 			return $currFolder;
 		}
