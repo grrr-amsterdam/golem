@@ -42,15 +42,6 @@ class Golem_Scaffold {
 				passthru('cp -R '.$node->getPathname().' '.$this->_to.DIRECTORY_SEPARATOR);
 			}
 		}
-		/*
-		passthru('cp -R garp/scripts/scaffold/application application');
-		passthru('cp -R garp/scripts/scaffold/docs docs');
-		passthru('cp -R garp/scripts/scaffold/library library');
-		passthru('cp -R garp/scripts/scaffold/public public');
-		passthru('cp -R garp/scripts/scaffold/tests tests');
-		passthru('cp -R garp/scripts/scaffold/.htaccess .htaccess');
-		passthru('cp -R garp/scripts/scaffold/__MANIFEST.md __MANIFEST.md');
-		 */
 	}
 
 	/**
