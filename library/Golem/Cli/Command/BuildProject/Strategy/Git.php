@@ -109,13 +109,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	protected function _createScaffolding() {
 		Garp_Cli::lineOut(' # Creating scaffolding');
 		// copy scaffold files
-		passthru('cp -R garp/scripts/scaffold/application application');
-		passthru('cp -R garp/scripts/scaffold/docs docs');
-		passthru('cp -R garp/scripts/scaffold/library library');
-		passthru('cp -R garp/scripts/scaffold/public public');
-		passthru('cp -R garp/scripts/scaffold/tests tests');
-		passthru('cp -R garp/scripts/scaffold/.htaccess .htaccess');
-		passthru('cp -R garp/scripts/scaffold/__MANIFEST.md __MANIFEST.md');
+		$scaffold = new Golem_Scaffold(
+			GOLEM_APPLICATION_PATH.'/../scripts/scaffold',
+			getcwd()
+		);
+		$scaffold->setup();
 
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
