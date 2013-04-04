@@ -36,7 +36,11 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 		$projectRepo = isset($args[1]) ? $args[1] : null;
 		$strategyClassName = 'Golem_Cli_Command_BuildProject_Strategy_'.ucfirst(strtolower($versionControl));
 		$strategy = new $strategyClassName($projectName, $projectRepo);
-		return $strategy->build();
+		$success = $strategy->build();
+		if ($success && Garp_Cli::confirm('Should I add a vhost for this project?')) {
+			$this->_toolkit->executeCommand('vhost', array('add', $projectName));
+		}			
+		return $success;
 	}
 
 

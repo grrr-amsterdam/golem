@@ -33,6 +33,10 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 		// Execute the clone cmd. Let errors fall thru.
 		$cloneCmd = sprintf(self::GIT_CLONE_CMD, $project, $destination);
 		`$cloneCmd`;
+
+		if (Garp_Cli::confirm('Should I add a vhost for this project?')) {
+			$this->_toolkit->executeCommand('vhost', array('add', $destination));
+		}
 		return true;
 	}
 
