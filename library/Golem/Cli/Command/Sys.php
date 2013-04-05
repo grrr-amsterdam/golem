@@ -37,7 +37,7 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 			Garp_Cli::lineOut('For now we\'ll continue with uncached data. Next time you will have to configure golem again.');
 		}
 		Garp_Cli::lineOut('For help, run ', null, false);
-		Garp_Cli::lineOut('golem help ', Garp_Cli::BLUE, false);
+		Garp_Cli::lineOut('golem sys help ', Garp_Cli::BLUE, false);
 		Garp_Cli::lineOut('');
 		return true;
 	}
