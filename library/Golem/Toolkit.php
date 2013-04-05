@@ -163,7 +163,7 @@ class Golem_Toolkit {
 		$cmdClassName = 'Cli_Command_'.ucfirst(strtolower($cmd));
 		$prefixes = array('App');
 		// Only try the Golem prefix if the Golem dir is actually there.
-		if (is_dir(APPLICATION_PATH.'/../library/Golem')) {
+		if (defined('APPLICATION_PATH') && is_dir(APPLICATION_PATH.'/../library/Golem')) {
 			$prefixes[] = 'Golem';
 		}
 		$prefixes[] = 'Garp';
@@ -200,7 +200,14 @@ class Golem_Toolkit {
 		$this->_rc = $golemRc;
 		if (!$golemRc->isConfigurationComplete()) {
 			// make sure we have a working setup
-			$success = $this->executeCommand('sys', array('configure'));
+			//$success = $this->executeCommand('sys', array('configure'));
+			// @todo Can't we just find a way to have Garp_Loader setup here?
+			require_once(GOLEM_APPLICATION_PATH.'/../library/Garp/Cli.php');
+			require_once(GOLEM_APPLICATION_PATH.'/../library/Garp/Cli/Command.php');
+			require_once(GOLEM_APPLICATION_PATH.'/../library/Golem/Cli/Command.php');
+			require_once(GOLEM_APPLICATION_PATH.'/../library/Golem/Cli/Command/Sys.php');
+			$sysCommand = new Golem_Cli_Command_Sys($this);
+			$success = $sysCommand->configure();
 			// @todo Is it right to exit here? If a developer was executing a command, he needs to do it again.
 			Garp_Cli::halt($success);
 		}

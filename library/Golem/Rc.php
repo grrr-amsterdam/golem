@@ -158,6 +158,7 @@ class Golem_Rc {
  	 * @todo Move array2phpStatement to utility class outside of Spawn namespace
  	 */
 	public function write() {
+		require_once(GOLEM_APPLICATION_PATH.'/../library/Garp/Model/Spawn/Util.php');
 		$phpArray = Garp_Model_Spawn_Util::array2phpStatement(self::$_data);
 		$phpReturnStatement  = "<?php\n";
 		$phpReturnStatement .= "return $phpArray;";
