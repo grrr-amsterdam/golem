@@ -1,1 +1,1 @@
-<?php define('APP_VERSION', 1);
+<?php define('APP_VERSION', 'ed16b0e');
