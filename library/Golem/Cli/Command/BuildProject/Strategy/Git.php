@@ -184,13 +184,18 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		$ignoreThis .= "application/data/cache/CSS/*\n";
 		$ignoreThis .= "application/data/cache/tags/*\n";
 		$ignoreThis .= "application/configs/version.php\n";
-		$ignoreThis .= "public/cached/*\n";
+		$ignoreThis .= "application/data/logs/*.log";
+		$ignoreThis .= "application/data/sql/*.sql";
+		$ignoreThis .= "chromedriver.log";
+		$ignoreThis .= "public/cached/**/*\n";
 		$ignoreThis .= "public/css/.sass-cache\n";
 		$ignoreThis .= "public/uploads/private/**/*\n";
 		$ignoreThis .= "public/uploads/shared/**/*\n";
+		$ignoreThis .= "public/uploads/sandbox/*";
 		$ignoreThis .= ".DS_Store\n";
 		$ignoreThis .= ".project\n";
 		file_put_contents('.gitignore', $ignoreThis);
 		passthru('git add .gitignore');
+		
 	}
 }
