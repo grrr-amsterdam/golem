@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Cli_Command_Content
+ * Golem_Cli_Command_Content
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
  * @version $Revision: $
@@ -8,7 +8,7 @@
  * @subpackage Cli
  * @lastmodified $Date: $
  */
-class Golem_Cli_Command_Content extends Garp_Cli_Command {
+class Golem_Cli_Command_Content extends Golem_Cli_Command {
 	protected $_environments = array('development', 'integration', 'staging', 'production');
 	
 	/**
@@ -69,7 +69,7 @@ class Golem_Cli_Command_Content extends Garp_Cli_Command {
 		$progress->init(1);
 		$progress->display('Analyzing');
 
-		$mediator = new Garp_Content_Upload_Mediator($this->_sourceEnv, $this->_targetEnv);
+		$mediator = new Golem_Content_Upload_Mediator($this->_sourceEnv, $this->_targetEnv);
 		$transferList = $mediator->fetchDiff();
 		$progress->display("√ Done comparing");
 
@@ -89,7 +89,7 @@ class Golem_Cli_Command_Content extends Garp_Cli_Command {
 	}
 
 	protected function _syncDb() {
-		$mediator 	= new Garp_Content_Db_Mediator($this->_sourceEnv, $this->_targetEnv);
+		$mediator 	= new Golem_Content_Db_Mediator($this->_sourceEnv, $this->_targetEnv);
 		$source 	= $mediator->getSource();
 		$target 	= $mediator->getTarget();
 
