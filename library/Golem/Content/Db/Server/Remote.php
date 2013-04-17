@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Content_Db_Server_Remote
+ * Golem_Content_Db_Server_Remote
  * 
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
@@ -9,7 +9,7 @@
  * @subpackage Content
  * @lastmodified $Date: $
  */
-class Garp_Content_Db_Server_Remote extends Garp_Content_Db_Server_Abstract {
+class Golem_Content_Db_Server_Remote extends Golem_Content_Db_Server_Abstract {
 	const PATH_BACKUP = '/shared/backup/db';
 
 	/**

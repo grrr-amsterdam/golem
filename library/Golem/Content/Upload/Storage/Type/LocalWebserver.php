@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Content_Upload_FileList_LocalWebserver
+ * Golem_Content_Upload_FileList_LocalWebserver
  * 
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
@@ -9,15 +9,15 @@
  * @subpackage Content
  * @lastmodified $Date: $
  */
-class Garp_Content_Upload_Storage_Type_LocalWebserver extends Garp_Content_Upload_Storage_Type_Abstract {
+class Golem_Content_Upload_Storage_Type_LocalWebserver extends Golem_Content_Upload_Storage_Type_Abstract {
 	const NEW_DIR_PERMISSIONS = 0774;
 
 
 	/**
-	 * @return Garp_Content_Upload_FileList
+	 * @return Golem_Content_Upload_FileList
 	 */
 	public function fetchFileList() {
-		$fileList = new Garp_Content_Upload_FileList();		
+		$fileList = new Golem_Content_Upload_FileList();		
 		$configuredPaths = $this->_getConfiguredPaths();
 
 		foreach ($configuredPaths as $type => $relDir) {
@@ -110,16 +110,16 @@ class Garp_Content_Upload_Storage_Type_LocalWebserver extends Garp_Content_Uploa
 	/**
 	 * @param Array 	$dirList	Array of filenames, f.i. the result of php's scandir()
 	 * @param String 	$type		Upload type
-	 * @return Garp_Content_Upload_FileList
+	 * @return Golem_Content_Upload_FileList
 	 */
 	protected function _addFilesByType(array $dirList, $type) {
-		$fileList = new Garp_Content_Upload_FileList();
+		$fileList = new Golem_Content_Upload_FileList();
 
 		foreach ($dirList as $baseName) {
 			$absPath = $this->_getAbsPath($baseName, $type);
 
 			if (is_file($absPath)) {
-				$fileNode = new Garp_Content_Upload_FileNode($baseName, $type);
+				$fileNode = new Golem_Content_Upload_FileNode($baseName, $type);
 				$fileList->addEntry($fileNode);
 			}
 		}

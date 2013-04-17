@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Content_Db_Server_Abstract
+ * Golem_Content_Db_Server_Abstract
  * 
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
@@ -9,7 +9,7 @@
  * @subpackage Content
  * @lastmodified $Date: $
  */
-abstract class Garp_Content_Db_Server_Abstract implements Garp_Content_Db_Server_Protocol {
+abstract class Golem_Content_Db_Server_Abstract implements Golem_Content_Db_Server_Protocol {
 	const PATH_CONFIG_APP 			= '/configs/application.ini';
 	const RESTORE_FILE 				= 'tmp_restore.sql';
 	
