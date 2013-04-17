@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Content_Upload_Storage_Type_RemoteWebserver
+ * Golem_Content_Upload_Storage_Type_RemoteWebserver
  * 
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
@@ -9,7 +9,7 @@
  * @subpackage Content
  * @lastmodified $Date: $
  */
-class Garp_Content_Upload_Storage_Type_RemoteWebserver extends Garp_Content_Upload_Storage_Type_Abstract {	
+class Golem_Content_Upload_Storage_Type_RemoteWebserver extends Golem_Content_Upload_Storage_Type_Abstract {	
 	/**
 	 * Array $_deployParams Associative array containing 'server', 'deploy_to' and 'user'
 	 */
@@ -30,10 +30,10 @@ class Garp_Content_Upload_Storage_Type_RemoteWebserver extends Garp_Content_Uplo
 
 
 	/**
-	 * @return Garp_Content_Upload_FileList
+	 * @return Golem_Content_Upload_FileList
 	 */
 	public function fetchFileList() {
-		$fileList = new Garp_Content_Upload_FileList();		
+		$fileList = new Golem_Content_Upload_FileList();		
 		$configuredPaths = $this->_getConfiguredPaths();
 
 		foreach ($configuredPaths as $type => $relDir) {
@@ -45,10 +45,10 @@ class Garp_Content_Upload_Storage_Type_RemoteWebserver extends Garp_Content_Uplo
 	}
 
 	/**
-	 * @return Garp_Content_Upload_FileList
+	 * @return Golem_Content_Upload_FileList
 	 */	
 	public function fetchFileListByType($type, $relDir) {
-		$fileList = new Garp_Content_Upload_FileList();		
+		$fileList = new Golem_Content_Upload_FileList();		
 		$baseDir = $this->_getBaseDir();
 		$lsCommand = "ls -ogl {$baseDir}{$relDir}";
 		
@@ -63,7 +63,7 @@ class Garp_Content_Upload_Storage_Type_RemoteWebserver extends Garp_Content_Uplo
 		foreach ($matches['permissions'] as $index => $permission) {
 			if ($permission[0] !== 'd') {
 				//	this is a file, no directory
-				$fileNode = new Garp_Content_Upload_FileNode(
+				$fileNode = new Golem_Content_Upload_FileNode(
 					$matches['filename'][$index],
 					$type
 				);
