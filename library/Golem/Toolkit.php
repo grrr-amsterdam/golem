@@ -83,6 +83,8 @@ class Golem_Toolkit {
 		$garpInitPath = GOLEM_APPLICATION_PATH.'/../garp/application/init.php';
 		if ($project) {
 			$this->enterProject($project);
+			// init.php needs BASE_PATH to be defined.
+			define('BASE_PATH', getcwd());
 			$garpInitPath = 'garp/application/init.php';
 		}
 		// Note: constants such as APPLICATION_PATH are set from the init file.
