@@ -50,8 +50,11 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
  	 */
 	public function help() {
 		Garp_Cli::lineOut('Usage:');
-		Garp_Cli::lineOut(' golem build <projectname> <repository>', Garp_Cli::BLUE);
+		Garp_Cli::lineOut(' golem build <projectname>', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
+		Garp_Cli::lineOut('When the repository name is not the same as the projectname:');
+		Garp_Cli::lineOut(' golem build <projectname> <repository>', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('');		
 		Garp_Cli::lineOut('For projects that use Subversion, add option --svn:');
 		Garp_Cli::lineOut(' golem build <projectname> <repository> --svn', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
