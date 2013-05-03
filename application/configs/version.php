@@ -1,1 +1,0 @@
-<?php define('APP_VERSION', 'df6c865');
