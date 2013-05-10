@@ -105,6 +105,7 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 	 * @return 	Boolean				Success of storage.
 	 */
 	public function store($filename, $type, &$data) {
+		$path		= $this->_getRelPath($filename, $type);
 		$dir 		= $this->_getRelDir($path);
 		$service 	= $this->_getService();
 
