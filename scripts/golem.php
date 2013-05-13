@@ -34,7 +34,9 @@ try {
 	$success = $golemToolkit->main();
 } catch (Exception $e) {
 	$success = false;
+	Garp_Cli::lineOut("");
 	Garp_Cli::errorOut($e->getMessage());
+	Garp_Cli::lineOut($e->getTraceAsString());
 }
 Garp_Cli::halt($success);
 
