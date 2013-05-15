@@ -43,6 +43,7 @@ class Golem_Content_Upload_FileNode {
 	 */
 	public function setFilename($filename) {
 		$this->_filename = $filename;
+		return $this;
 	}
 	
 	/**
@@ -57,6 +58,7 @@ class Golem_Content_Upload_FileNode {
 	 */
 	public function setType($type) {
 		$this->_type = $type;
+		return $this;
 	}
 	
 	public function isValid() {

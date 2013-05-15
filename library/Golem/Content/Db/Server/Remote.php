@@ -95,6 +95,7 @@ class Golem_Content_Db_Server_Remote extends Golem_Content_Db_Server_Abstract {
 	 */
 	public function setDeployParams(array $deployParams) {
 		$this->_deployParams = $deployParams;
+		return $this;
 	}
 
 	/**
@@ -102,6 +103,7 @@ class Golem_Content_Db_Server_Remote extends Golem_Content_Db_Server_Abstract {
 	 */
 	public function setSession(Garp_Shell_RemoteSession $session) {
 		$this->_session = $session;
+		return $this;
 	}
 
 	/**

@@ -88,7 +88,7 @@ class Golem_Content_Upload_Mediator {
 			
 		if (!$data) {
 			$progress->advance();
-			continue;
+			return;
 		}
 
 		$progress->display("Uploading {$filename}");			
