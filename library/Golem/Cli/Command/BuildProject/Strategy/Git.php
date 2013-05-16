@@ -145,6 +145,8 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		passthru('git add public/media/images/garp');
 		passthru('ln -s ../garp/library/Garp/3rdParty/PHPExcel/Classes/PHPExcel library/PHPExcel');
 		passthru('git add library/PHPExcel');
+		passthru('ln -s ../../golem/library/Golem library/Golem');
+		passthru('git add library/Golem');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	} 
