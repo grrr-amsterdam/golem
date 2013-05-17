@@ -6,6 +6,7 @@ application/data/cache/tags/*
 application/configs/version.php
 public/cached/**/*
 public/css/.sass-cache
+.sass-cache
 public/uploads/private/**/*
 public/uploads/shared/**/*
 .DS_Store
