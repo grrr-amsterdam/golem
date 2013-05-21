@@ -22,20 +22,6 @@ class Golem_Cli_Command_Server extends Golem_Cli_Command {
 	 * @var Resource $_sshSession
 	 */
 	protected $_sshSession;
-	
-	/**
-	 * @return Resource
-	 */
-	public function getSshSession() {
-		return $this->_sshSession;
-	}
-	
-	/**
-	 * @param Resource $sshSession
-	 */
-	public function setSshSession($sshSession) {
-		$this->_sshSession = $sshSession;
-	}	
 
 	/**
  	 * Class constructor
@@ -57,6 +43,20 @@ class Golem_Cli_Command_Server extends Golem_Cli_Command {
 
 		Garp_Cli::lineOut('Done.');
 	}
+
+	/**
+	 * @return Resource
+	 */
+	public function getSshSession() {
+		return $this->_sshSession;
+	}
+	
+	/**
+	 * @param Resource $sshSession
+	 */
+	public function setSshSession($sshSession) {
+		$this->_sshSession = $sshSession;
+	}	
 	
 	protected function _openSshSession() {
 		$remoteSession 	= new Garp_Shell_RemoteSession(self::HOST, self::SSH_USER);
@@ -136,10 +136,10 @@ class Golem_Cli_Command_Server extends Golem_Cli_Command {
 		$wwwDir		= $this->_getWwwDir();
 		
 		$vhostLines = array(
-			"<VirtualHost *:80>"
-		    . "\tServerName  {$projectUrl}"
-			. "\tDocumentRoot {$wwwDir}"
-			. "</VirtualHost>"
+			"<VirtualHost *:80>",
+		    "\tServerName  {$projectUrl}",
+			"\tDocumentRoot {$wwwDir}",
+			"</VirtualHost>",
 		);
 		
 		return implode("\n", $vhostLines);
