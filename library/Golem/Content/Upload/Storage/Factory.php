@@ -15,7 +15,7 @@ class Golem_Content_Upload_Storage_Factory {
 	 * @param String $environment The environment id, f.i. 'development' or 'production'.
 	 */
 	public static function create($environment) {
-		$ini = new Zend_Config_Ini(APPLICATION_PATH.'/configs/application.ini', $environment);
+		$ini = new Garp_Config_Ini(APPLICATION_PATH.'/configs/application.ini', $environment);
 		$cdnType = $ini->cdn->type;
 		
 		switch($cdnType) {

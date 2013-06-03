@@ -53,7 +53,7 @@ abstract class Golem_Content_Upload_Storage_Type_Abstract implements Golem_Conte
 	
 	
 	protected function _setIni() {
-		$this->_ini = new Zend_Config_Ini(APPLICATION_PATH.'/configs/application.ini', $this->_environment);
+		$this->_ini = new Garp_Config_Ini(APPLICATION_PATH.'/configs/application.ini', $this->_environment);
 	}
 
 
