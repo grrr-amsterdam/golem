@@ -281,7 +281,7 @@ abstract class Golem_Content_Db_Server_Abstract implements Golem_Content_Db_Serv
 		if (is_null($environment)) {
 			$environment = $this->getEnvironment();
 		}
-		$config = new Zend_Config_Ini(APPLICATION_PATH . self::PATH_CONFIG_APP, $environment);
+		$config = new Garp_Config_Ini(APPLICATION_PATH . self::PATH_CONFIG_APP, $environment);
 		return $config;
 	}
 	
