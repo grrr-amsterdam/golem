@@ -22,6 +22,11 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 
 		$project = isset($args[0]) ? $args[0] : Garp_Cli::prompt('Choose project');
 		$localUrl = isset($args[1]) ? $args[1] : Garp_Cli::prompt('Choose local URL');
+		// Strip protocol from URL
+		$proto = '://';
+		if (strpos($localUrl, $proto) !== false) {
+			$localUrl = substr($localUrl, strpos($localUrl, $proto) + strlen($proto));
+		}
 
 		$webroot = $workspace.DIRECTORY_SEPARATOR.$project.DIRECTORY_SEPARATOR.'public';
 
