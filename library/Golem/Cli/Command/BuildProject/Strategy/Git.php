@@ -76,7 +76,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 			$this->_createScaffolding();
 			$this->_checkOutZend();
 			$this->_createSymlinks();
-			$this->_fixPermissions();
 			$this->_addFilesToGit();
 
 			Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
@@ -150,20 +149,6 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	} 
-
-	/**
- 	 * Set write permissions on certain folders
- 	 */
-	protected function _fixPermissions() {
-		Garp_Cli::lineOut(' # Setting permissions');
-		passthru('chmod -R 777 application/data/cache');
-		passthru('chmod -R 777 application/data/logs');
-		passthru('chmod -R 777 public/uploads');
-		// passthru('chmod -R 777 garp/library/Garp/3rdParty/dompdf/lib/fonts');
-
-		Garp_Cli::lineOut('Done.');
-		Garp_Cli::lineOut('');
-	}
 
 	/**
  	 * Add files to git, and add some files to .gitignore

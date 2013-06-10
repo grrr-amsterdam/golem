@@ -39,7 +39,8 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 		$success = $strategy->build();
 		if ($success && Garp_Cli::confirm('Should I add a vhost for this project?')) {
 			$this->_toolkit->executeCommand('vhost', array('add', $projectName));
-		}			
+		}
+		$this->_toolkit->executeCommand('permissions', array('set'));
 		return $success;
 	}
 
