@@ -18,18 +18,15 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 	const FILE_TIMESTAMP_THRESHOLD 			= '-2 weeks';
 	const TEST_FILENAME                     = 'tmp_file_Golem_Content_Cdn_AssetList_Test_tmp_file';
 
-
 	public function test_Base_Dir_Should_Not_Be_Empty() {
 		$baseDir = $this->_getBaseDir();
 		$this->assertNotSame(strlen($baseDir), 0);
 	}
 
-
 	public function test_No_Assets_Should_Be_Selected_If_No_Match() {
 		$assetList	= $this->_getListInstance(self::FILTER_STRING_NOT_MATCHING);
 		$this->assertSame(count($assetList), 0);
-	}
-
+	} 
 
 	public function test_Multiple_Assets_Should_Be_Selected_If_Match() {
 		$this->_addTmpFile();
@@ -41,18 +38,15 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 		$this->_rmTmpFile();
 	}
 
-
 	public function test_One_Garp_Asset_Should_Be_Selected_If_Specific_Match() {
 		$assetList	= $this->_getListInstance(self::FILTER_STRING_MATCHING_ONE_GARP, false);
 		$this->assertSame(count($assetList), 1);
 	}
 
-
 	public function test_One_App_Asset_Should_Be_Selected_If_Specific_Match() {
 		$assetList	= $this->_getListInstance(self::FILTER_STRING_MATCHING_ONE_APP, false);
 		$this->assertSame(count($assetList), 1);
-	}
-
+	} 
 
 	public function test_Assets_Paths_Should_Be_Relative() {
 		$this->_addTmpFile();
@@ -63,8 +57,7 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 
 		// cleanup
 		$this->_rmTmpFile();
-	}
-	
+	} 
 	
 	public function test_Assets_Should_Not_Be_Older_Than_Threshold_If_No_Params_Given() {
 		$assetList	= $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
@@ -80,19 +73,16 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 				. ', should be: now ' . self::FILE_TIMESTAMP_THRESHOLD
 			);
 		}
-	}
-
+	} 
 	
 	protected function _getBaseDir() {
 		$distributor = new Golem_Content_Cdn_Distributor();
 		return $distributor->getBaseDir();
 	}
 	
-	
 	protected function _getListInstance($filterString, $filterByFileDate = null) {
 		return new Golem_Content_Cdn_AssetList($this->_getBaseDir(), $filterString, $filterByFileDate);
-	}
-
+	} 
 
 	// Make sure a changed file is present
 	protected function _addTmpFile() {
