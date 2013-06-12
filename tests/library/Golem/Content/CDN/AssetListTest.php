@@ -13,9 +13,10 @@
 class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 	const FILTER_STRING_MATCHING_MULTIPLE 	= 'css';
 	const FILTER_STRING_MATCHING_ONE_GARP 	= 'css/garp/images/garp.png';
-	const FILTER_STRING_MATCHING_ONE_APP 	= 'css/cms.css';
+	const FILTER_STRING_MATCHING_ONE_APP 	= 'cms.css';
 	const FILTER_STRING_NOT_MATCHING 		= 'l3$#j@[hdv%@u2w2a9g08u.e3#d@c';
 	const FILE_TIMESTAMP_THRESHOLD 			= '-2 weeks';
+	const TEST_FILENAME                     = 'tmp_file_Golem_Content_Cdn_AssetList_Test_tmp_file';
 
 
 	public function test_Base_Dir_Should_Not_Be_Empty() {
@@ -31,8 +32,16 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 
 
 	public function test_Multiple_Assets_Should_Be_Selected_If_Match() {
-		$assetList	= $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
-		$this->assertTrue((bool)count($assetList));
+		// Make sure a changed file is present
+		$baseDir = $this->_getBaseDir();
+		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
+		file_put_contents($tmpFilePath, uniqid());
+
+		$assetList = $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
+		$this->assertTrue((bool)count($assetList), 'Assetlist length is actually: ' . count($assetList));
+
+		// cleanup
+		unlink($tmpFilePath);
 	}
 
 
@@ -49,8 +58,17 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 
 
 	public function test_Assets_Paths_Should_Be_Relative() {
-		$assetList	= $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
+		// Make sure a changed file is present
+		$baseDir = $this->_getBaseDir();
+		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
+		file_put_contents($tmpFilePath, uniqid());
+
+		$assetList = $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
+		$this->assertTrue((bool)count($assetList), 'Assetlist length is actually: ' . count($assetList));
 		$this->assertTrue(strpos($assetList[0], $this->_getBaseDir()) === false);
+
+		// cleanup
+		unlink($tmpFilePath);		
 	}
 	
 	
