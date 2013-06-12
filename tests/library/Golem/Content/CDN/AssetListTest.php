@@ -32,16 +32,13 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 
 
 	public function test_Multiple_Assets_Should_Be_Selected_If_Match() {
-		// Make sure a changed file is present
-		$baseDir = $this->_getBaseDir();
-		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
-		file_put_contents($tmpFilePath, uniqid());
+		$this->_addTmpFile();
 
 		$assetList = $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
 		$this->assertTrue((bool)count($assetList), 'Assetlist length is actually: ' . count($assetList));
 
 		// cleanup
-		unlink($tmpFilePath);
+		$this->_rmTmpFile();
 	}
 
 
@@ -58,17 +55,14 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 
 
 	public function test_Assets_Paths_Should_Be_Relative() {
-		// Make sure a changed file is present
-		$baseDir = $this->_getBaseDir();
-		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
-		file_put_contents($tmpFilePath, uniqid());
+		$this->_addTmpFile();
 
 		$assetList = $this->_getListInstance(self::FILTER_STRING_MATCHING_MULTIPLE);
 		$this->assertTrue((bool)count($assetList), 'Assetlist length is actually: ' . count($assetList));
 		$this->assertTrue(strpos($assetList[0], $this->_getBaseDir()) === false);
 
 		// cleanup
-		unlink($tmpFilePath);		
+		$this->_rmTmpFile();
 	}
 	
 	
@@ -100,4 +94,17 @@ class Golem_Content_Cdn_AssetList_Test extends PHPUnit_Framework_TestCase {
 	}
 
 
+	// Make sure a changed file is present
+	protected function _addTmpFile() {
+		$baseDir = $this->_getBaseDir();
+		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
+		file_put_contents($tmpFilePath, uniqid());
+	}		
+
+	// Cleanup tmp file
+	protected function _rmTmpFile() {
+		$baseDir = $this->_getBaseDir();
+		$tmpFilePath = $baseDir . DIRECTORY_SEPARATOR . self::TEST_FILENAME . self::FILTER_STRING_MATCHING_MULTIPLE;
+		unlink($tmpFilePath);
+	}
 }
