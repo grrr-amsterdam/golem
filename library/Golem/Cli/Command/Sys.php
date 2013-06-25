@@ -32,12 +32,13 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		if ($golemRc->write()) {
 			Garp_Cli::lineOut('Your settings have been saved. If you ever want to reconfigure, simply run ', null, false);
 			Garp_Cli::lineOut('golem Sys configure', Garp_Cli::BLUE);
+			Garp_Cli::lineOut('');
 		} else {
 			Garp_Cli::errorOut('There was trouble saving your .golemrc file. Make sure '.APPLICATION_PATH.'/data/ is writable.');
 			Garp_Cli::lineOut('For now we\'ll continue with uncached data. Next time you will have to configure golem again.');
 		}
 		Garp_Cli::lineOut('For help, run ', null, false);
-		Garp_Cli::lineOut('golem sys help ', Garp_Cli::BLUE, false);
+		Garp_Cli::lineOut('golem sys help ', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 		return true;
 	}
@@ -60,8 +61,10 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('You can prepend your commands with the project name in order to execute them in the context of that project. For example:');
 		Garp_Cli::lineOut('golem '.$projects[0].' admin add', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('Alternatively, execute a system-wide command:');
 		Garp_Cli::lineOut('golem checkout grrr.nl', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('');
 		return true;
 	}
 
@@ -81,5 +84,6 @@ class Golem_Cli_Command_Sys extends Golem_Cli_Command {
 	protected function _welcome() {
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('WELCOME TO GOLEM!', Garp_Cli::GREEN);
+		Garp_Cli::lineOut('');
 	}
 }
