@@ -35,21 +35,25 @@ class Golem_Cli_Command_Cdn extends Golem_Cli_Command {
 			
 		$assetList 			= $this->_distributor->select($filterString, $filterDate);
 
-		if ($assetList) {
-			$assetCount = count($assetList);
-			$summary = $assetCount === 1 ? $assetList[0] : $assetCount . ' assets';
-			$filterDateLabel = $this->_getFilterDateLabel($filterDate, $assetList);
-			$summary .= " since {$filterDateLabel}.";
-			Garp_Cli::lineOut("Distributing {$summary}\n");
+		if (!$assetList) {
+			Garp_Cli::errorOut("No files to distribute.");
+			return;
+		}
 
-			if (!$isDryRun) {
-				foreach ($filterEnvironments as $env) {
-					$this->_distributor->distribute($env, $assetList, $assetCount);
-				}
-			} else {
-				Garp_Cli::lineOut(implode("\n", (array)$assetList));
-			}
-		} else Garp_Cli::errorOut("No files to distribute.");
+		$assetCount = count($assetList);
+		$summary = $assetCount === 1 ? $assetList[0] : $assetCount . ' assets';
+		$filterDateLabel = $this->_getFilterDateLabel($filterDate, $assetList);
+		$summary .= " since {$filterDateLabel}.";
+		Garp_Cli::lineOut("Distributing {$summary}\n");
+
+		if ($isDryRun) {
+			Garp_Cli::lineOut(implode("\n", (array)$assetList));
+			return;
+		}
+
+		foreach ($filterEnvironments as $env) {
+			$this->_distributor->distribute($env, $assetList, $assetCount);
+		}
 	}
 
 
