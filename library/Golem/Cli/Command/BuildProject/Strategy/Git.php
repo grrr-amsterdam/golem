@@ -181,6 +181,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		$ignoreThis .= "public/uploads/sandbox/*";
 		$ignoreThis .= ".DS_Store\n";
 		$ignoreThis .= ".project\n";
+		$ignoreThis .= ".vagrant\n";
 		file_put_contents('.gitignore', $ignoreThis);
 		passthru('git add .gitignore');
 		
