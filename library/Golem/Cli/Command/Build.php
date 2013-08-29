@@ -49,6 +49,7 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 			$this->_toolkit->executeCommand('vhost', array('add', $projectName));
 		}
 		$this->_toolkit->executeCommand('permissions', array('set'));
+		$this->_toolkit->executeCommand('git', array('setup'));
 		return $success;
 	}
 
