@@ -14,9 +14,13 @@ class Golem_Cli_Command_Permissions extends Golem_Cli_Command {
  	 * @return Boolean
  	 */
 	public function set(array $args = array()) {
-		$project = $this->_toolkit->getCurrentProject();
-		$this->_toolkit->enterProject($project);
-
+		if (!file_exists('application/data/cache') ||
+			!file_exists('application/data/logs') ||
+			!file_exists('public/uploads')) {
+			Garp_Cli::errorOut('It looks like there are no directories for me to set permissions on.');
+			return false;
+		}
+		Garp_Cli::lineOut('Setting permissions on writable folders...');
 		passthru('chmod -R 777 application/data/cache');
 		passthru('chmod -R 777 application/data/logs');
 		passthru('chmod -R 777 public/uploads');
