@@ -12,3 +12,4 @@ public/uploads/shared/**/*
 .DS_Store
 .project
 application/data/.golemrc
+Blackhole.php
