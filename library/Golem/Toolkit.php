@@ -169,6 +169,12 @@ class Golem_Toolkit {
 			$prefixes[] = 'Golem';
 		}
 		$prefixes[] = 'Garp';
+		
+		// Allow namespaces to be configured in ini file.
+		$config = Zend_Registry::get('config');
+		if (!empty($config->cli->namespaces)) {
+			$prefixes = $config->cli->namespaces->toArray();
+		}
 		$garpLoader = Garp_Loader::getInstance();
 		foreach ($prefixes as $prefix) {
 			$fullCmdClassName = $prefix.'_'.$cmdClassName;
