@@ -45,7 +45,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 * @return Void
  	 */
 	public function __construct($projectName, $repository = null) {
-		$repository = $repository ?: 'git@flow.grrr.nl:'.$projectName;
+		$repository = $repository ?: 'git@code.grrr.nl:grrr/'.$projectName;
 
 		$this->_projectName = $projectName;
 		$this->_projectRepository = $repository;
