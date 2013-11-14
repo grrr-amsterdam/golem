@@ -25,6 +25,9 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command {
 			return false;
 		}
 
+		// Init semver (if semver is already initialized it's no problem, just ignore the output)
+		$this->_exec_cmd('semver init');
+
 		$type = isset($args[0]) ? $args[0] : 'patch';
 		$semver_cmd = "semver inc ";
 		if (!in_array($type, $this->_allowed_version_bumps)) {
