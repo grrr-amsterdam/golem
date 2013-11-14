@@ -58,6 +58,8 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 	public function help(array $args = array()) {
 		Garp_Cli::lineOut('Usage:');
 		Garp_Cli::lineOut(' golem checkout <projectname> [<destination-folder>]', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Use the --flow flag to clone projects from the old flow.grrr.nl server:');
+		Garp_Cli::lineOut(' golem checkout <projectname> [<destination-folder>] --flow', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 		return true;
 	}
