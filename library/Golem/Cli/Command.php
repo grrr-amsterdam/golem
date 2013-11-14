@@ -10,12 +10,12 @@
  * @package      Golem_Cli
  */
 class Golem_Cli_Command extends Garp_Cli_Command {
+
 	/**
  	 * Golem Toolkit. It's full of wisdom.
  	 * @var Golem_Toolkit
  	 */
 	protected $_toolkit;
-
 
 	/**
  	 * Class constructor
@@ -25,4 +25,5 @@ class Golem_Cli_Command extends Garp_Cli_Command {
 	public function __construct(Golem_Toolkit $toolkit) {
 		$this->_toolkit = $toolkit;
 	}
+
 }
