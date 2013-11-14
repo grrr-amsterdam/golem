@@ -20,6 +20,11 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command {
  	 * Start a git flow release
  	 */
 	public function start($args) {
+		// Sanity check: do you have the right tools for the job?
+		if (!$this->_requiredToolsAvailable()) {
+			return false;
+		}
+
 		$type = isset($args[0]) ? $args[0] : 'patch';
 		$semver_cmd = "semver inc ";
 		if (!in_array($type, $this->_allowed_version_bumps)) {
@@ -65,6 +70,27 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command {
  	 */
 	protected function _exec_cmd($cmd) {
 		return shell_exec($cmd);
+	}
+
+	/**
+ 	 * Check if semver and git flow are installed
+ 	 */
+	protected function _requiredToolsAvailable() {
+		$semver_checker = shell_exec('which semver');
+		if (empty($semver_checker)) {
+			Garp_Cli::errorOut('semver is not installed');
+			Garp_Cli::lineOut('Install like this:');
+			Garp_Cli::lineOut(' gem install semver', Garp_Cli::BLUE);
+			return false;
+		}
+		$gitflow_checker = shell_exec('which git-flow');
+		if (empty($gitflow_checker)) {
+			Garp_Cli::errorOut('git-flow is not installed');
+			Garp_Cli::lineOut('Get it from brew');
+			Garp_Cli::lineOut(' brew install git-flow', Garp_Cli::BLUE);
+			return false;
+		}
+		return true;
 	}
 
 	public function help() {
