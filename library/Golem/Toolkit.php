@@ -163,18 +163,7 @@ class Golem_Toolkit {
  	 */
 	public function getCommandClass($cmd) {
 		$cmdClassName = 'Cli_Command_'.ucfirst(strtolower($cmd));
-		$prefixes = array('App');
-		// Only try the Golem prefix if the Golem dir is actually there.
-		if (defined('APPLICATION_PATH') && is_dir(APPLICATION_PATH.'/../library/Golem')) {
-			$prefixes[] = 'Golem';
-		}
-		$prefixes[] = 'Garp';
-		
-		// Allow namespaces to be configured in ini file.
-		$config = Zend_Registry::get('config');
-		if (!empty($config->cli->namespaces)) {
-			$prefixes = $config->cli->namespaces->toArray();
-		}
+		$prefixes = $this->getAvailableCommandNamespaces();
 		$garpLoader = Garp_Loader::getInstance();
 		foreach ($prefixes as $prefix) {
 			$fullCmdClassName = $prefix.'_'.$cmdClassName;
@@ -311,6 +300,26 @@ class Golem_Toolkit {
 		}
 		chdir($projectPath);
 	} 
+
+	/**
+ 	 * Return all available namespaces.
+ 	 * @return Array
+ 	 */
+	public function getAvailableCommandNamespaces() {
+		$namespaces = array('App');
+		// Only try the Golem prefix if the Golem dir is actually there.
+		if (defined('APPLICATION_PATH') && is_dir(APPLICATION_PATH.'/../library/Golem')) {
+			$namespaces[] = 'Golem';
+		}
+		$namespaces[] = 'Garp';
+		
+		// Allow namespaces to be configured in ini file.
+		$config = Zend_Registry::get('config');
+		if (!empty($config->cli->namespaces)) {
+			$namespaces = $config->cli->namespaces->toArray();
+		}
+		return $namespaces;
+	}
 
 	/**
  	 * Figure out the current APPLICATION_ENV
