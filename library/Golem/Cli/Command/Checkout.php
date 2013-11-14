@@ -9,9 +9,10 @@
  */
 class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 	/**
- 	 * The Git clone command
+ 	 * The Git clone commands
  	 */
-	const GIT_CLONE_CMD = 'git clone git@flow.grrr.nl:%s %s --recursive';
+	const GIT_CLONE_CMD_FLOW_SERVER = 'git clone git@flow.grrr.nl:%s %s --recursive';
+	const GIT_CLONE_CMD = 'git clone git@code.grrr.nl:grrr/%s %s --recursive';
 
 	/**
  	 * Checkout a project
@@ -30,8 +31,15 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 		if (!empty($args[1])) {
 			$destination = $args[1];
 		}
+
+		// Toggle old server on
+		$clone_cmd = self::GIT_CLONE_CMD;
+		if (array_key_exists('flow', $args)) {
+			$clone_cmd = self::GIT_CLONE_CMD_FLOW_SERVER;
+		}
+
 		// Execute the clone cmd. Let errors fall thru.
-		$cloneCmd = sprintf(self::GIT_CLONE_CMD, $project, $destination);
+		$cloneCmd = sprintf($clone_cmd, $project, $destination);
 		`$cloneCmd`;
 
 		$this->_toolkit->enterProject($project);
