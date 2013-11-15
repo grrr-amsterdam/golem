@@ -13,7 +13,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	 * @var String
 	 */
 	const GARP3_REPO = 'git@flow.grrr.nl:garp3';
-	
+
 	/**
 	 * Zend Framework repository
 	 * @var String
@@ -30,7 +30,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 * Project repository
  	 * @var String
  	 */
-	protected $_projectRepository; 
+	protected $_projectRepository;
 
 	/**
  	 * Project root
@@ -67,7 +67,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 				Garp_Cli::errorOut('The repository you\'re trying to checkout either does not exist or you do not have access rights.');
 				return false;
 			}
-			// start by checking out the project repo 
+			// start by checking out the project repo
 			$this->_checkOutProjectRepository();
 
 			chdir($this->_projectRoot);
@@ -80,7 +80,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 
 			Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
 		}
-	} 
+	}
 
 	/**
  	 * Check out project repo
@@ -89,7 +89,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		Garp_Cli::lineOut(' # Cloning project repository: '.$this->_projectRepository);
 		passthru('git clone '.$this->_projectRepository);
 		Garp_Cli::lineOut('Done.');
-		Garp_Cli::lineOut('');		
+		Garp_Cli::lineOut('');
 	}
 
 	/**
@@ -148,7 +148,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		passthru('git add library/Golem');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
-	} 
+	}
 
 	/**
  	 * Add files to git, and add some files to .gitignore
@@ -162,7 +162,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		passthru('git add public');
 		passthru('git add tests');
 		passthru('git add .htaccess');
-		passthru('git add .gitmodules');		
+		passthru('git add .gitmodules');
 		passthru('git add __MANIFEST.md');
 
 		$ignoreThis  = "application/data/cache/pluginLoaderCache.php\n";
@@ -171,19 +171,22 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		$ignoreThis .= "application/data/cache/CSS/*\n";
 		$ignoreThis .= "application/data/cache/tags/*\n";
 		$ignoreThis .= "application/configs/version.php\n";
-		$ignoreThis .= "application/data/logs/*.log";
-		$ignoreThis .= "application/data/sql/*.sql";
-		$ignoreThis .= "chromedriver.log";
+		$ignoreThis .= "application/data/logs/*.log\n";
+		$ignoreThis .= "application/data/sql/*.sql\n";
+		$ignoreThis .= "chromedriver.log\n";
 		$ignoreThis .= "public/cached/*\n";
 		$ignoreThis .= "public/css/.sass-cache\n";
 		$ignoreThis .= "public/uploads/private/*\n";
 		$ignoreThis .= "public/uploads/shared/*\n";
-		$ignoreThis .= "public/uploads/sandbox/*";
+		$ignoreThis .= "public/uploads/sandbox/*\n";
+		$ignoreThis .= "public/js/build/dev/*\n";
+		$ignoreThis .= "public/css/compiled/dev/*.css\n";
+		$ignoreThis .= "node_modules\n";
 		$ignoreThis .= ".DS_Store\n";
 		$ignoreThis .= ".project\n";
 		$ignoreThis .= ".vagrant\n";
 		file_put_contents('.gitignore', $ignoreThis);
 		passthru('git add .gitignore');
-		
+
 	}
 }
