@@ -13,3 +13,4 @@ public/uploads/shared/**/*
 .project
 application/data/.golemrc
 Blackhole.php
+node_modules
