@@ -12,7 +12,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	 * Garp3 repository URL
 	 * @var String
 	 */
-	const GARP3_REPO = 'git@flow.grrr.nl:garp3';
+	const GARP3_REPO = 'git@code.grrr.nl:grrr/garp3';
 
 	/**
 	 * Zend Framework repository
