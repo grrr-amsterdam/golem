@@ -17,10 +17,15 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
 
 		while (true) {
 			// Grab a line of PHP code from the prompt
-			$line = Garp_Cli::prompt('');
+			if (function_exists('readline') && function_exists('readline_add_history')) {
+				$line = readline('> ');
+				readline_add_history($line);
+			} else {
+				$line = Garp_Cli::prompt('');
+			}
 
 			// Execute it, and grab its output
-			ob_start(array($this, '_output'));
+			ob_start(array($this, 'output'));
 
 			/**
  			 * Note that $this->__result will be populated, if no target variable is given
@@ -30,8 +35,12 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
  			 * $rows = $someModel->fetchAll();
  			 * Because we assume the user wants to do something with the variable.
 			 */
-			if (!preg_match('/^\$\w+\s?\=/', $line)) {
+			if (!preg_match('/^(\$\w+\s?\=)|print|echo/', $line)) {
 				$line = '$this->__result = ' . $line;
+			}
+			// Fix missing semicolon
+			if (substr($line, -1) !== ';') {
+				$line .= ';';
 			}
 			eval($line);
 			ob_end_flush();
@@ -46,7 +55,7 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
  	 * Output the result of the eval'd expression
  	 * @return String 
  	 */
-	protected function _output($buffer) {
+	public function output($buffer) {
 		if (!$buffer && !$this->__result) {
 			return '';
 		}
