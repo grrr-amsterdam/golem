@@ -36,7 +36,7 @@ class Golem_Toolkit {
  	 * @var Array
  	 */
 	protected static $_sysCommands = array(
-		'sys', 'build', 'checkout', 'vhost'
+		'sys', 'build', 'checkout', 'vhost', 'complete'
 	); 
 
 	/**
@@ -185,8 +185,16 @@ class Golem_Toolkit {
  	 * @return Boolean
  	 */
 	public function isSysCommand($cmd) {
-		return in_array($cmd, self::$_sysCommands);
+		return in_array($cmd, $this->getSysCommands());
 	} 
+
+	/**
+ 	 * Grab all sys commands
+ 	 * @return Array
+ 	 */
+	public function getSysCommands() {
+		return self::$_sysCommands;
+	}
 
 	/**
  	 * Set which Golem_Rc to use.
