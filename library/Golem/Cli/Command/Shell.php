@@ -9,46 +9,34 @@
  */
 class Golem_Cli_Command_Shell extends Golem_Cli_Command {
 
+	/**
+ 	 * Prompt symbols, appear in front of the cli.
+ 	 */
+	const MULTILINE_PROMPT = ' - ';
+	const SINGLE_LINE_PROMPT = '> ';
+
+	/**
+ 	 * Result of evaluated expression.
+ 	 * @var Mixed
+ 	 */
 	public $__result;
 
+	/**
+ 	 * Input (used in multi-line mode).
+ 	 * This is populated when the user submits expressions that don't end in semicolon.
+ 	 * Input is appended to this property until a semicolon is submitted.
+ 	 * @var String
+ 	 */
+	protected $_input = '';
+
+	/**
+ 	 * Main starting point
+ 	 */
 	public function main(array $args = array()) {
 		Garp_Cli::lineOut('Welcome to the Garp interactive shell.', Garp_Cli::YELLOW);
 		Garp_Cli::lineOut('Use Ctrl-C to quit.');
 
-		while (true) {
-			// Grab a line of PHP code from the prompt
-			if (function_exists('readline') && function_exists('readline_add_history')) {
-				$line = readline('> ');
-				readline_add_history($line);
-			} else {
-				$line = Garp_Cli::prompt('');
-			}
-
-			// Execute it, and grab its output
-			ob_start(array($this, 'output'));
-
-			/**
- 			 * Note that $this->__result will be populated, if no target variable is given
- 			 * in the expression. In other words, this will populate $this->__result:
- 			 * $someModel->fetchAll();
- 			 * But this won't:
- 			 * $rows = $someModel->fetchAll();
- 			 * Because we assume the user wants to do something with the variable.
-			 */
-			if (!preg_match('/^(\$\w+\s?\=)|print|echo/', $line)) {
-				$line = '$this->__result = ' . $line;
-			}
-			// Fix missing semicolon
-			if (substr($line, -1) !== ';') {
-				$line .= ';';
-			}
-			eval($line);
-			ob_end_flush();
-
-			// Clear result var
-			$this->__result = null;
-		}
-
+		$this->_tick();
 	}
 
 	/**
@@ -75,6 +63,73 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
 		}
 
 		return $out;
+	}
+
+	/**
+ 	 * One iteration in the main loop.
+ 	 * @return Void
+ 	 */
+	protected function _tick() {
+		while(true) {
+			// Grab a line of PHP code from the prompt
+			$line = $this->_getInput();
+
+			/**
+ 		 	 * Note that $this->__result will be populated, if no target variable is given
+ 		 	 * in the expression. In other words, this will populate $this->__result:
+ 		 	 * $someModel->fetchAll();
+ 		 	 * But this won't:
+ 		 	 * $rows = $someModel->fetchAll();
+ 		 	 * ...because we assume the user wants to do something with the variable.
+		 	 */
+			if (!$this->_input && !preg_match('/^(\$\w+\s?\=)|print|echo/', $line)) {
+				$line = '$this->__result = ' . $line;
+			}
+
+			$this->_input .= $line;
+
+			// If no semicolon is found at the end, assume
+			// multi-line input. The user is therefore not finished,
+			// so we just continue here and wait for that semicolon.
+			if (substr($line, -1) !== ';') {
+				continue;
+			}
+
+			// Execute input, and grab its output
+			ob_start(array($this, 'output'));
+			eval($this->_input);
+			ob_end_flush();
+
+			// Clear result var
+			$this->__result = null;
+			// Reset input
+			$this->_input = '';
+		}
+	}
+
+	/**
+ 	 * Retrieve input from the user.
+ 	 * Prefer readline because it supports history.
+ 	 * @return String
+ 	 */
+	protected function _getInput() {
+		if (function_exists('readline') && function_exists('readline_add_history')) {
+			$line = readline($this->_getPrompt());
+			readline_add_history($line);
+			return $line;
+		}
+		echo $this->_getPrompt();
+		$line = Garp_Cli::prompt();
+		return $line;
+	}		
+
+	/**
+ 	 * Return prompt symbol.
+ 	 * In multi-line mode it's "-", otherwise "".
+ 	 * @return String
+ 	 */
+	protected function _getPrompt() {
+		return $this->_input ? self::MULTILINE_PROMPT : self::SINGLE_LINE_PROMPT;
 	}
 
 }
