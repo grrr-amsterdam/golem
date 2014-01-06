@@ -59,27 +59,28 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	public function build() {
 		if (file_exists($this->_projectRoot)) {
 			Garp_Cli::errorOut('The project folder already exists. I don\'t know what to do.');
-		} else {
-			// sanity check: is the repository accessible?
-			$checkCommand = 'if ( git ls-remote '.$this->_projectRepository.' &> /dev/null ); then echo \'accessible\'; fi';
-			$checkResult  = trim(`$checkCommand`);
-			if ('accessible' !== $checkResult) {
-				Garp_Cli::errorOut('The repository you\'re trying to checkout either does not exist or you do not have access rights.');
-				return false;
-			}
-			// start by checking out the project repo
-			$this->_checkOutProjectRepository();
-
-			chdir($this->_projectRoot);
-
-			$this->_setupGarp();
-			$this->_createScaffolding();
-			$this->_checkOutZend();
-			$this->_createSymlinks();
-			$this->_addFilesToGit();
-
-			Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
+			return false;
 		}
+
+		// sanity check: is the repository accessible?
+		$checkCommand = 'if ( git ls-remote '.$this->_projectRepository.' &> /dev/null ); then echo \'accessible\'; fi';
+		$checkResult  = trim(`$checkCommand`);
+		if ('accessible' !== $checkResult) {
+			Garp_Cli::errorOut('The repository you\'re trying to checkout either does not exist or you do not have access rights.');
+			return false;
+		}
+		// start by checking out the project repo
+		$this->_checkOutProjectRepository();
+
+		chdir($this->_projectRoot);
+
+		$this->_setupGarp();
+		$this->_createScaffolding();
+		$this->_checkOutZend();
+		$this->_createSymlinks();
+		$this->_addFilesToGit();
+
+		Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
 	}
 
 	/**
@@ -93,11 +94,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	}
 
 	/**
- 	 * Setup Garp submodule
+ 	 * Setup Garp subtree
  	 */
 	protected function _setupGarp() {
-		Garp_Cli::lineOut(' # Setting up Garp submodule');
-		passthru('git submodule add '.self::GARP3_REPO.' garp');
+		Garp_Cli::lineOut(' # Setting up Garp subtree');
+		passthru('git subtree add -P garp --squash ' . self::GARP3_REPO . ' master');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
