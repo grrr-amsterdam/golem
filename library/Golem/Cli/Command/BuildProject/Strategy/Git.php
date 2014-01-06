@@ -156,15 +156,13 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 */
 	protected function _addFilesToGit() {
 		// Add files to staging area
-		passthru('git add application');
-		passthru('git add docs');
-		passthru('git add garp');
-		passthru('git add library');
-		passthru('git add public');
-		passthru('git add tests');
-		passthru('git add .htaccess');
-		passthru('git add .gitmodules');
-		passthru('git add __MANIFEST.md');
+		$paths = array(
+			'application', 'docs', 'garp', 'library', 'public', 'tests', '.htaccess', '__MANIFEST.md',
+			'.semver', 'Capfile', 'Gruntfile.js', 'package.json'
+		);
+		foreach ($paths as $path) {
+			passthru("git add {$path}");
+		}
 
 		$ignoreThis  = "application/data/cache/pluginLoaderCache.php\n";
 		$ignoreThis .= "application/data/cache/URI/*\n";
