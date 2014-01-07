@@ -1,6 +1,6 @@
 <?php
 /**
- * Garp_Cli_Command_Git
+ * Golem_Cli_Command_Git
  * Providing a user-friendly Git interface.
  *
  * @author       $Author:$
@@ -10,7 +10,7 @@
  * @subpackage   Cli
  * @lastmodified $LastChangedDate:$
  */
-class Garp_Cli_Command_Git extends Garp_Cli_Command {
+class Golem_Cli_Command_Git extends Garp_Cli_Command {
 	/**
  	 * Setup Git as per Grrr conventions
  	 * @return Void
@@ -26,6 +26,9 @@ class Garp_Cli_Command_Git extends Garp_Cli_Command {
 		$hookSource = 'garp/scripts/util/post-commit';
 		$hookTarget = '.git/hooks/post-commit';
 		$this->_moveGitHook($hookSource, $hookTarget);
+
+		// Init Git Flow
+		passthru('git flow init');
 
 		Garp_Cli::lineOut('Done.');
 		return true;
@@ -151,3 +154,4 @@ class Garp_Cli_Command_Git extends Garp_Cli_Command {
 	}
 
 }
+
