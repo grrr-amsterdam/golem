@@ -74,6 +74,12 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 
 		chdir($this->_projectRoot);
 
+		// sanity check: is the project already built?
+		if (is_dir('application') && is_dir('library') && is_dir('public')) {
+			Garp_Cli::errorOut('I dunno man, this project looks pretty built already. Maybe you meant to do g checkout ' . $this->_projectName . '?');
+			return false;
+		}		
+
 		$this->_createScaffolding();
 		$this->_setupGarp();
 
