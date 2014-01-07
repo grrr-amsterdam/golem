@@ -81,6 +81,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 		$this->_addFilesToGit();
 
 		Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
+		return true;
 	}
 
 	/**
@@ -98,6 +99,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 */
 	protected function _setupGarp() {
 		Garp_Cli::lineOut(' # Setting up Garp subtree');
+		// Git subtree needs a commit in order to be able to merge trees.
+		// Make that commit here
+		passthru('touch .gitignore');
+		passthru('git add .gitignore');
+		passthru('git commit -m "Initial commit."');
 		passthru('git subtree add -P garp --squash ' . self::GARP3_REPO . ' master');
 		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
