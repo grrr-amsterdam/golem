@@ -4,7 +4,7 @@
  * Build project using Git
  *
  * @author       Harmen Janssen | grrr.nl
- * @version      1.1
+ * @version      1.5.0
  * @package      Golem_Cli_Command_BuildProject
  */
 class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_BuildProject_Strategy_Interface {
@@ -74,13 +74,10 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 
 		chdir($this->_projectRoot);
 
-		$this->_setupGarp();
 		$this->_createScaffolding();
-		$this->_checkOutZend();
-		$this->_createSymlinks();
-		$this->_addFilesToGit();
+		$this->_setupGarp();
 
-		Garp_Cli::lineOut('Project created successfully. Thanks for watching.');
+		Garp_Cli::lineOut('Project created successfully. Thanks for watching.', Garp_Cli::GREEN);
 		return true;
 	}
 
@@ -88,24 +85,8 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 * Check out project repo
  	 */
 	protected function _checkOutProjectRepository() {
-		Garp_Cli::lineOut(' # Cloning project repository: '.$this->_projectRepository);
+		Garp_Cli::lineOut(' # Cloning project repository: '.$this->_projectRepository, Garp_Cli::YELLOW);
 		passthru('git clone '.$this->_projectRepository);
-		Garp_Cli::lineOut('Done.');
-		Garp_Cli::lineOut('');
-	}
-
-	/**
- 	 * Setup Garp subtree
- 	 */
-	protected function _setupGarp() {
-		Garp_Cli::lineOut(' # Setting up Garp subtree');
-		// Git subtree needs a commit in order to be able to merge trees.
-		// Make that commit here
-		passthru('touch .gitignore');
-		passthru('git add .gitignore');
-		passthru('git commit -m "Initial commit."');
-		passthru('git subtree add -P garp --squash ' . self::GARP3_REPO . ' master');
-		Garp_Cli::lineOut('Done.');
 		Garp_Cli::lineOut('');
 	}
 
@@ -113,85 +94,38 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
  	 * Create project scaffolding
  	 */
 	protected function _createScaffolding() {
-		Garp_Cli::lineOut(' # Creating scaffolding');
-		// copy scaffold files
+		Garp_Cli::lineOut(' # Creating scaffolding', Garp_Cli::YELLOW);
+
+		// Git subtree needs a commit in order to be able to merge trees.
+		// Make that commit here
+		passthru('touch .gitignore');
+		passthru('git add .gitignore');
+		passthru('git commit -m "Initial commit."');
+
+		// Copy scaffold files
 		$scaffold = new Golem_Scaffold(
-			GOLEM_APPLICATION_PATH.'/../scripts/scaffold',
+			'git@code.grrr.nl:grrr/garp_scaffold',
 			getcwd()
 		);
 		$scaffold->setup();
 
-		Garp_Cli::lineOut('Done.');
+		// Commit scaffold
+		passthru('git add .');
+		passthru('git commit -m "Created scaffolding."');
+
 		Garp_Cli::lineOut('');
 	}
 
 	/**
- 	 * Checkout Zend library
+ 	 * Setup Garp subtree
  	 */
-	protected function _checkOutZend() {
-		Garp_Cli::lineOut(' # Checking out the Zend library');
-		passthru('svn export '.self::ZEND_REPO.' library/Zend');
-		passthru('git add library/Zend');
-		Garp_Cli::lineOut('Done.');
+	protected function _setupGarp() {
+		Garp_Cli::lineOut(' # Adding Garp subtree', Garp_Cli::YELLOW);
+		passthru('git subtree add -P garp --squash ' . self::GARP3_REPO . ' master');
+
+		passthru('git add .');
+		passthru('git commit -m "Added Garp."');
+
 		Garp_Cli::lineOut('');
-	}
-
-	/**
- 	 * Create symlinks
- 	 */
-	protected function _createSymlinks() {
-		Garp_Cli::lineOut(' # Creating symlinks');
-		passthru('ln -s ../garp/library/Garp library/Garp');
-		passthru('git add library/Garp');
-		passthru('ln -s ../../garp/public/css public/css/garp');
-		passthru('git add public/css/garp');
-		passthru('ln -s ../../garp/public/js public/js/garp');
-		passthru('git add public/js/garp');
-		passthru('ln -s ../../../garp/public/images public/media/images/garp');
-		passthru('git add public/media/images/garp');
-		passthru('ln -s ../garp/library/Garp/3rdParty/PHPExcel/Classes/PHPExcel library/PHPExcel');
-		passthru('git add library/PHPExcel');
-		passthru('ln -s ../../golem/library/Golem library/Golem');
-		passthru('git add library/Golem');
-		Garp_Cli::lineOut('Done.');
-		Garp_Cli::lineOut('');
-	}
-
-	/**
- 	 * Add files to git, and add some files to .gitignore
- 	 */
-	protected function _addFilesToGit() {
-		// Add files to staging area
-		$paths = array(
-			'application', 'docs', 'garp', 'library', 'public', 'tests', '.htaccess', '__MANIFEST.md',
-			'.semver', 'Capfile', 'Gruntfile.js', 'package.json'
-		);
-		foreach ($paths as $path) {
-			passthru("git add {$path}");
-		}
-
-		$ignoreThis  = "application/data/cache/pluginLoaderCache.php\n";
-		$ignoreThis .= "application/data/cache/URI/*\n";
-		$ignoreThis .= "application/data/cache/HTML/*\n";
-		$ignoreThis .= "application/data/cache/CSS/*\n";
-		$ignoreThis .= "application/data/cache/tags/*\n";
-		$ignoreThis .= "application/configs/version.php\n";
-		$ignoreThis .= "application/data/logs/*.log\n";
-		$ignoreThis .= "application/data/sql/*.sql\n";
-		$ignoreThis .= "chromedriver.log\n";
-		$ignoreThis .= "public/cached/*\n";
-		$ignoreThis .= "public/css/.sass-cache\n";
-		$ignoreThis .= "public/uploads/private/*\n";
-		$ignoreThis .= "public/uploads/shared/*\n";
-		$ignoreThis .= "public/uploads/sandbox/*\n";
-		$ignoreThis .= "public/js/build/dev/*\n";
-		$ignoreThis .= "public/css/compiled/dev/*.css\n";
-		$ignoreThis .= "node_modules\n";
-		$ignoreThis .= ".DS_Store\n";
-		$ignoreThis .= ".project\n";
-		$ignoreThis .= ".vagrant\n";
-		file_put_contents('.gitignore', $ignoreThis);
-		passthru('git add .gitignore');
-
 	}
 }
