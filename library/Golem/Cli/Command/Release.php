@@ -21,7 +21,7 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command {
  	 */
 	public function start($args) {
 		// Sanity check: do you have the right tools for the job?
-		if (!$this->_requiredToolsAvailable()) {
+		if (!$this->_required_tools_available()) {
 			return false;
 		}
 
@@ -78,7 +78,7 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command {
 	/**
  	 * Check if semver and git flow are installed
  	 */
-	protected function _requiredToolsAvailable() {
+	protected function _required_tools_available() {
 		$semver_checker = shell_exec('which semver');
 		if (empty($semver_checker)) {
 			Garp_Cli::errorOut('semver is not installed');
