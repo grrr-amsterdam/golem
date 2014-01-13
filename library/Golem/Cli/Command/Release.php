@@ -29,8 +29,10 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command_Flow {
 		Garp_Cli::lineOut(' g release start', Garp_Cli::BLUE);
 		Garp_Cli::lineOut(' g release finish', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
-		Garp_Cli::lineOut('Determine the type of version bump: (default is patch)');
-		Garp_Cli::lineOut(' g release start major|minor|patch', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Determine the type of version bump: (default is minor)');
+		Garp_Cli::lineOut(' g release start major|minor', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Or do a "special" release:');
+		Garp_Cli::lineOut(' g release start "beta"');
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('Note: this requires the git flow and semver commandline utilities.');
 	}
