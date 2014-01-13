@@ -10,15 +10,30 @@
 class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 
 	/**
- 	 * Start a new release branch
+ 	 * Overwrite to perform sanity checks
  	 */
-	public function startRelease(array $args = array()) {
+	public function main(array $args = array()) {
 		// Sanity check: do you have the right tools for the job?
 		if (!$this->_required_tools_available()) {
 			return false;
 		}
 
-		$this->_bump_version($args);
+		// Validate wether the git index is clean
+		if (!$this->_validate_status()) {
+			return false;
+		}		
+
+
+		return parent::main($args);
+	}
+
+	/**
+ 	 * Start a new release branch
+ 	 */
+	public function startRelease(array $args = array()) {
+		// Can be minor, major, or 'special'
+		$type = isset($args[0]) ? $args[0] : 'minor';
+		$this->_bump_version($type);
 		$version = $this->_get_current_version();
 
 		// Stash cause we can't start the release until the git index is clean
@@ -45,14 +60,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
  	 */
 	public function finishRelease() {
 		$version = $this->_get_current_version();
-		$branch = $this->_get_current_branch();
-		$prefix = $this->_get_gitflow_prefix('release');
-		if ($branch != $prefix . $version) {
-			Garp_Cli::errorOut("I'm sorry, you're not on the (right) release branch.");
-			Garp_Cli::lineOut("Expected branch: $prefix$version");
-			Garp_Cli::lineOut("Got: $branch");
-			Garp_Cli::lineOut("Please start the release first using");
-			Garp_Cli::lineOut(' g release start', Garp_Cli::BLUE);
+		if (!$this->_validate_branch('release', $version)) {
 			return false;
 		}
 		Garp_Cli::lineOut('Finishing release ' . $version);
@@ -61,11 +69,46 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return true;
 	}
 
-	public function hotfix(array $args = array()) {
+	public function startHotfix(array $args = array()) {
+		$this->_bump_version('patch');
+		$version = $this->_get_current_version();
+		// Reset version cause we want to submit it only when finishing the hotfix
+		$git_co_cmd = 'git checkout -- .semver';
+		$this->_exec_cmd($git_co_cmd);
+
+		$git_flow_start_release_cmd = 'git flow hotfix start ' . $version;
+		$this->_exec_cmd($git_flow_start_release_cmd);
+		return true;
 		
 	}
 
-	public function feature(array $args = array()) {
+	public function finishHotfix(array $args = array()) {
+		$this->_bump_version('patch');
+		$version = $this->_get_current_version();
+		if (!$this->_validate_branch('hotfix', $version)) {
+			// When shit hits the fan: revert semver
+			$git_co_cmd = 'git checkout -- .semver';
+			$this->_exec_cmd($git_co_cmd);
+			return false;
+		}
+
+		$git_add_cmd = 'git add .semver';
+		$this->_exec_cmd($git_add_cmd);
+
+		// Commit semver
+		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
+		$this->_exec_cmd($git_ci_cmd);
+
+		$finish_hotfix_cmd = 'git flow hotfix finish ' . $version;
+		$this->_exec_cmd($finish_hotfix_cmd);
+		return true;
+	}
+
+	public function startFeature(array $args = array()) {
+		
+	}
+
+	public function finishFeature(array $args = array()) {
 		
 	}
 
@@ -78,17 +121,15 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 
 	/**
  	 * Bump semver
- 	 * @param Array $args Original arguments to the cli command. Might contain type of version increase.
+ 	 * @param String $type Type of semver increment
  	 * @return Void
  	 */
-	protected function _bump_version(array $args = array()) {
+	protected function _bump_version($type) {
 		// Init semver (if semver is already initialized it's no problem, just ignore the output)
 		$this->_exec_cmd('semver init');
 
-		// Can be minor, major, or 'special'
-		$type = isset($args[0]) ? $args[0] : 'minor';
 		$semver_cmd = "semver inc ";
-		if (!in_array($type, array('minor', 'major'))) {
+		if (!in_array($type, array('patch', 'minor', 'major'))) {
 			$semver_cmd .= "special ";
 		}
 		$semver_cmd .= $type;
@@ -124,12 +165,44 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 	}
 
 	/**
+ 	 *
+ 	 */
+	protected function _validate_branch($type, $suffix) {
+		$branch = $this->_get_current_branch();
+		$prefix = $this->_get_gitflow_prefix($type);
+		if ($branch == $prefix . $suffix) {
+			return true;
+		}
+		Garp_Cli::errorOut("I'm sorry, you're not on the (right) $type branch.");
+		Garp_Cli::lineOut("Expected branch: $prefix$suffix");
+		Garp_Cli::lineOut("Got: $branch");
+		return false;
+	}		
+
+	/**
  	 * Get the configured Git-flow prefix
  	 */
 	protected function _get_gitflow_prefix($category) {
 		$prefix = $this->_exec_cmd("git config gitflow.prefix.$category");
 		$prefix = trim($prefix);
 		return $prefix;
+	}
+
+	/**
+ 	 * Check if git status is clean. Return boolean accordingly.
+ 	 * @return Boolean
+ 	 */
+	protected function _validate_status() {
+		$st = $this->_exec_cmd('git status --porcelain');
+		$st = trim($st);
+
+		if (!$st) {
+			return true;
+		}
+
+		Garp_Cli::errorOut("I can't proceed. Please clean your index first.");
+		Garp_Cli::lineOut($st);
+		return false;
 	}
 
 	/**
