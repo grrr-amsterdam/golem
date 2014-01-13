@@ -134,7 +134,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 			return false;
 		}
 
-		$curr_feature = preg_replace('/^' . preg_quote($prefix) . '/', '', $branch);
+		$curr_feature = preg_replace('~^' . preg_quote($prefix) . '~', '', $branch);
 		$git_flow_feature_end_cmd = 'git flow feature finish ' . $curr_feature;
 		passthru($git_flow_feature_end_cmd);
 		return true;
