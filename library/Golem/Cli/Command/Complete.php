@@ -12,14 +12,51 @@ class Golem_Cli_Command_Complete extends Golem_Cli_Command {
 	protected $_ignored_commands = array('complete', 'exception');
 
 	public function main(array $args = array()) {
+		// 0 => "g"
+		unset($args[0]);
+
+		/**
+ 		 *
+ 		 * @todo Finish this. It would be nice to be able to tab-complete it
+ 		 * all using Golem, but for now it's just too complex. The current 
+ 		 * setup with Garp_Cli_Command::complete() works, but it would be cool
+ 		 * to be able to also complete arguments and whatnot.
+ 		 *
+ 		 */
+		// First command
+		//if (count($args) <= 1) {
+			$out = $this->_completeFirstArg($args);
+		/*
+		} else {
+			// Assume: 0 = cmd, 1 = action, rest is args
+			try {
+				$cmd = $this->_toolkit->getCommandClass($args[0]);
+			} catch (Golem_Exception $e) {
+				$out = array('neen');
+				return false;
+			}
+			$out = $cmd->getPublicMethods();
+		}
+		 */
+		Garp_Cli::lineOut(implode(' ', $out));
+		return true;
+	}
+
+	/**
+ 	 * Complete first argument (can be an actual command when in a project, or the name of a project
+ 	 */
+	protected function _completeFirstArg($args) {
+		if (!$this->_toolkit->getCurrentProject()) {
+			// Only sys commands are available
+			return $this->_toolkit->getSysCommands();
+		}
 		$namespaces = $this->_toolkit->getAvailableCommandNamespaces();
 		$out = array();
 		foreach ($namespaces as $namespace) {
 			$this->_iterate_namespace($namespace, $out);
 		}
-		Garp_Cli::lineOut(implode(' ', $out));
-		return true;
-	}
+		return $out;
+	}		
 
 	/**
  	 * Iterate possible command namespace
