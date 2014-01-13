@@ -63,9 +63,8 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		if (!$this->_validate_branch('release', $version)) {
 			return false;
 		}
-		Garp_Cli::lineOut('Finishing release ' . $version);
 		$git_flow_finish_release_cmd = 'git flow release finish -m "Release_' . $version . '" ' . $version;
-		$this->_exec_cmd($git_flow_finish_release_cmd);
+		passthru($git_flow_finish_release_cmd);
 		return true;
 	}
 
@@ -82,7 +81,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		$git_flow_start_release_cmd = 'git flow hotfix start ' . $version;
 		$this->_exec_cmd($git_flow_start_release_cmd);
 		return true;
-		
 	}
 
 	/**
@@ -114,14 +112,32 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
  	 * Start feature branch
  	 */
 	public function startFeature(array $args = array()) {
-		
+		if (empty($args[0])) {
+			Garp_Cli::errorOut('No feature given. Do you want me to come up with a new feature myself?');
+			return false;
+		}
+		$feature = $args[0];
+		$git_flow_feature_start_cmd = 'git flow feature start ' . $feature;
+		$this->_exec_cmd($git_flow_feature_start_cmd);
+		return true;
 	}
 
 	/**
  	 * Finish feature branch
  	 */
 	public function finishFeature(array $args = array()) {
-		
+		$branch = $this->_get_current_branch();
+		$prefix = $this->_get_gitflow_prefix('feature');
+
+		if (!preg_match('/^' . preg_quote($prefix) . '/', $branch)) {
+			Garp_Cli::errorOut('You are not currently on a feature branch.');
+			return false;
+		}
+
+		$curr_feature = preg_replace('/^' . preg_quote($prefix) . '/', '', $branch);
+		$git_flow_feature_end_cmd = 'git flow feature finish ' . $curr_feature;
+		passthru($git_flow_feature_end_cmd);
+		return true;
 	}
 
 	/**
