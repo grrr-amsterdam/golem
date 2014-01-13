@@ -129,7 +129,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		$branch = $this->_get_current_branch();
 		$prefix = $this->_get_gitflow_prefix('feature');
 
-		if (!preg_match('/^' . preg_quote($prefix) . '/', $branch)) {
+		if (!preg_match('~^' . preg_quote($prefix) . '~', $branch)) {
 			Garp_Cli::errorOut('You are not currently on a feature branch.');
 			return false;
 		}
