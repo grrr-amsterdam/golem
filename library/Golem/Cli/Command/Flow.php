@@ -69,6 +69,9 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return true;
 	}
 
+	/**
+ 	 * Start hotfix branch
+ 	 */
 	public function startHotfix(array $args = array()) {
 		$this->_bump_version('patch');
 		$version = $this->_get_current_version();
@@ -82,6 +85,9 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		
 	}
 
+	/**
+ 	 * Finish hotfix branch
+ 	 */
 	public function finishHotfix(array $args = array()) {
 		$this->_bump_version('patch');
 		$version = $this->_get_current_version();
