@@ -110,10 +110,16 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return true;
 	}
 
+	/**
+ 	 * Start feature branch
+ 	 */
 	public function startFeature(array $args = array()) {
 		
 	}
 
+	/**
+ 	 * Finish feature branch
+ 	 */
 	public function finishFeature(array $args = array()) {
 		
 	}
