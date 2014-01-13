@@ -105,8 +105,8 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
 		$this->_exec_cmd($git_ci_cmd);
 
-		$finish_hotfix_cmd = 'git flow hotfix finish ' . $version;
-		$this->_exec_cmd($finish_hotfix_cmd);
+		$finish_hotfix_cmd = 'git flow hotfix finish -m "Hotfix_' . $version . '" ' . $version;
+		passthru($finish_hotfix_cmd);
 		return true;
 	}
 
