@@ -39,5 +39,3 @@ try {
 	Garp_Cli::lineOut($e->getTraceAsString());
 }
 Garp_Cli::halt($success);
-
-// @todo Recreate tab completion functionality in Golem

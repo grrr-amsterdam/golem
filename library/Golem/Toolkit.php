@@ -15,6 +15,12 @@ class Golem_Toolkit {
 	const GOLEMRC = '/data/.golemrc'; 
 
 	/**
+ 	 * Flag used to silence Golem
+ 	 * @var String
+ 	 */
+	const QUIET_FLAG = 'quiet';
+
+	/**
  	 * @var Golem_Toolkit
  	 */
 	protected static $_instance; 
@@ -78,6 +84,13 @@ class Golem_Toolkit {
 			$this->_throwException('MissingEnvironment', 'APPLICATION_ENV is not set. Please set it as a shell variable or pass it along as an argument, like so: --e=development');
 		}
 		define('APPLICATION_ENV', $applicationEnv);
+
+		// Check if "quiet" flag is set
+		$quiet = isset($args[static::QUIET_FLAG]);
+		if ($quiet) {
+			Garp_Cli::setQuiet(true);
+			unset($args[static::QUIET_FLAG]);
+		}
 
  		// The following makes sure the right configuration is used for a given project.
 		$garpInitPath = GOLEM_APPLICATION_PATH.'/../garp/application/init.php';
