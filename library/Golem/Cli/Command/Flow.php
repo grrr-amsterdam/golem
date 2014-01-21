@@ -244,6 +244,8 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 			Garp_Cli::lineOut(' gem install semver', Garp_Cli::BLUE);
 			return false;
 		}
+		/*
+			@todo REFACTOR LATER! Check fails on Ubuntu?
 		$gitflow_checker = shell_exec('which git-flow');
 		if (empty($gitflow_checker)) {
 			Garp_Cli::errorOut('git-flow is not installed');
@@ -251,6 +253,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 			Garp_Cli::lineOut(' brew install git-flow', Garp_Cli::BLUE);
 			return false;
 		}
+		 */
 		return true;
 	}
 
