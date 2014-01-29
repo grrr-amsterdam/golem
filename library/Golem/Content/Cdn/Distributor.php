@@ -79,7 +79,7 @@ class Golem_Content_Cdn_Distributor {
 			$fileOrFiles = $this->_printFileOrFiles($assetCount);
 			$progressBar->display("Processing {$firstFilename}. {$assetCount} {$fileOrFiles} left.");
 
-			$s3 = new Garp_File_Storage_S3($ini->cdn, dirname(current($assetList)));
+			$s3 = new Garp_File_Storage_S3($ini->cdn, dirname(current($assetList)), true);
 
 			foreach ($assetList as $i => $asset) {
 				$s3->setPath(dirname($asset));
