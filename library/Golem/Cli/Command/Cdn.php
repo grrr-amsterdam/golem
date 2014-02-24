@@ -16,13 +16,10 @@ class Golem_Cli_Command_Cdn extends Golem_Cli_Command {
 	const DRY_RUN_PARAM					= 'dry';
 	
 	protected $_distributor;
-	
-	
-	
+
 	public function __construct() {
 		$this->_distributor = new Golem_Content_Cdn_Distributor();
 	}
-	
 	
 	/**
 	 * Distributes the public assets on the local server to the configured CDN servers.
@@ -56,7 +53,6 @@ class Golem_Cli_Command_Cdn extends Golem_Cli_Command {
 		}
 	}
 
-
 	public function help() {
 		Garp_Cli::lineOut("☞  U s a g e :\n");
 		Garp_Cli::lineOut("Distributing all assets to the CDN servers:");
@@ -89,22 +85,21 @@ class Golem_Cli_Command_Cdn extends Golem_Cli_Command {
 		Garp_Cli::lineOut("");
 
 	}
-	
-	
+
 	protected function _getFilterDateLabel($filterDate, $assetList) {
 		if ($filterDate === false) {
 			return 'forever';
-		} elseif ($filterDate === null) {
+		}
+		if ($filterDate === null) {
 			return date('j-n-Y', $assetList->getFilterDate());
-		} else return $filterDate;
+		}
+		return $filterDate;
 	}
-	
-	
+
 	protected function _getFilterString(array $args) {
 		return array_key_exists(0, $args) ? $args[0] : null;
 	}
-	
-	
+
 	protected function _getFilterDate(array $args) {
 		return array_key_exists(self::FILTER_DATE_PARAM, $args) ?
 			($args[self::FILTER_DATE_PARAM] === self::FILTER_DATE_VALUE_NEGATION ?
@@ -114,19 +109,17 @@ class Golem_Cli_Command_Cdn extends Golem_Cli_Command {
 			null
 		;
 	}
-	
-	
+
 	protected function _getFilterEnvironments(array $args) {
-		$allEnvironments 	= $this->_distributor->getEnvironments();
-		$environments 		= array_key_exists(self::FILTER_ENV_PARAM, $args) ?
+		$allEnvironments = $this->_distributor->getEnvironments();
+		$environments    = array_key_exists(self::FILTER_ENV_PARAM, $args) ?
 			(array)$args[self::FILTER_ENV_PARAM] :
 			$allEnvironments
 		;
 			
 		return $environments;
 	}
-	
-	
+
 	protected function _getDryRunParam(array $args) {
 		return array_key_exists(self::DRY_RUN_PARAM, $args);
 	}
