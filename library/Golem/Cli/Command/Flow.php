@@ -78,7 +78,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		$git_co_cmd = 'git checkout -- .semver';
 		$this->_exec_cmd($git_co_cmd);
 
-		$git_flow_start_release_cmd = 'git flow hotfix start ' . $version;
+		$git_flow_start_release_cmd = 'git flow hotfix -F start ' . $version;
 		$this->_exec_cmd($git_flow_start_release_cmd);
 		return true;
 	}
