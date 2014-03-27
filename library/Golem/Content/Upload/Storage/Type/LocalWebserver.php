@@ -104,6 +104,8 @@ class Golem_Content_Upload_Storage_Type_LocalWebserver extends Golem_Content_Upl
 			$this->_throwDirAccessError($absDir);
 		}
 
+		$dirList = array_filter($dirList, array($this, '_isAllowedPath'));
+
 		return $dirList;
 	}
 	
