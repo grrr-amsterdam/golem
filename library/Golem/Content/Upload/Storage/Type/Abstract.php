@@ -15,6 +15,7 @@
  */
 abstract class Golem_Content_Upload_Storage_Type_Abstract implements Golem_Content_Upload_Storage_Protocol {
 	const ERROR_CANT_OPEN_DIRECTORY = "Unable to open the configuration directory: %s";
+	const BANNED_PATH = '/scaled/';
 
 	protected $_uploadTypes = array('document', 'image');
 
@@ -90,5 +91,15 @@ abstract class Golem_Content_Upload_Storage_Type_Abstract implements Golem_Conte
 	protected function _throwDirAccessError($dir) {
 		$errorMsg = sprintf(self::ERROR_CANT_OPEN_DIRECTORY, $dir);
 		throw new Exception($errorMsg);
+	}
+
+	/**
+ 	 * Make sure that 'scaled' files are skipped.
+ 	 * DUCKTAPE WARNING!
+ 	 * This method should probably be deprecated, in favor of syncing all files, included scaled versions.
+ 	 * Either way, this should not be necessary in the first place.
+ 	 */
+	protected function _isAllowedPath($path) {
+		return strpos($path, self::BANNED_PATH) === false;
 	}
 }

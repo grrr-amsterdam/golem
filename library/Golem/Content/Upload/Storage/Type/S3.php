@@ -43,7 +43,7 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 		$fileList = new Golem_Content_Upload_FileList();
 
 		foreach ($dirList as $path) {
-			if ($this->_isFilePath($path)) {
+			if ($this->_isFilePath($path) && $this->_isAllowedPath($path)) {
 				$baseName = basename($path);
 				$fileNode = new Golem_Content_Upload_FileNode($baseName, $type);
 				$fileList->addEntry($fileNode);
@@ -57,6 +57,7 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 	protected function _isFilePath($path) {
 		return $path[strlen($path) - 1] !== '/';
 	}
+
 
 
 	/**

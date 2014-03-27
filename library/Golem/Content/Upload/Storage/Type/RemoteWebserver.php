@@ -61,10 +61,15 @@ class Golem_Content_Upload_Storage_Type_RemoteWebserver extends Golem_Content_Up
 		preg_match_all($pattern, $dirListing, $matches);
 			
 		foreach ($matches['permissions'] as $index => $permission) {
-			if ($permission[0] !== 'd') {
+			$fileName = $matches['filename'][$index];
+
+			if (
+				$permission[0] !== 'd' &&
 				//	this is a file, no directory
+				$this->_isAllowedPath($fileName)
+			) {
 				$fileNode = new Golem_Content_Upload_FileNode(
-					$matches['filename'][$index],
+					$fileName,
 					$type
 				);
 
