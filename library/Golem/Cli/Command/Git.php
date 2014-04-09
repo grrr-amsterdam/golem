@@ -22,10 +22,15 @@ class Golem_Cli_Command_Git extends Garp_Cli_Command {
 		// configure color.ui
 		passthru('git config color.ui auto');
 
+		// Fuck this git hook. The location of hooks is changing with each git version
+		// and it's not reliable. Furthermore it's not even really useful, we should
+		// fix this problem in the asset distribution layer.
+		// @todo Deprecate this officially and come up with a better way.
+		//
 		// setup git hook for updating APP_VERSION... 
-		$hookSource = 'garp/scripts/util/post-commit';
-		$hookTarget = '.git/hooks/post-commit';
-		$this->_moveGitHook($hookSource, $hookTarget);
+		//$hookSource = 'garp/scripts/util/post-commit';
+		//$hookTarget = '.git/hooks/post-commit';
+		//$this->_moveGitHook($hookSource, $hookTarget);
 
 		// Init Git Flow
 		passthru('git flow init');
