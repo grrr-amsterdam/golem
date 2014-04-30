@@ -114,6 +114,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 	public function startFeature(array $args = array()) {
 		if (empty($args[0])) {
 			Garp_Cli::errorOut('No feature given. Do you want me to come up with a new feature myself?');
+			Garp_Cli::errorOut('(I suggest making me self-aware)');
 			return false;
 		}
 		$feature = $args[0];
