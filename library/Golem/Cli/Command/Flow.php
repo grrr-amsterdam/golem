@@ -23,7 +23,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 			return false;
 		}		
 
-
 		return parent::main($args);
 	}
 
@@ -105,39 +104,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 
 		$finish_hotfix_cmd = 'git flow hotfix finish -m "Hotfix_' . $version . '" ' . $version;
 		passthru($finish_hotfix_cmd);
-		return true;
-	}
-
-	/**
- 	 * Start feature branch
- 	 */
-	public function startFeature(array $args = array()) {
-		if (empty($args[0])) {
-			Garp_Cli::errorOut('No feature given. Do you want me to come up with a new feature myself?');
-			Garp_Cli::errorOut('(I suggest making me self-aware)');
-			return false;
-		}
-		$feature = $args[0];
-		$git_flow_feature_start_cmd = 'git flow feature start ' . $feature;
-		$this->_exec_cmd($git_flow_feature_start_cmd);
-		return true;
-	}
-
-	/**
- 	 * Finish feature branch
- 	 */
-	public function finishFeature(array $args = array()) {
-		$branch = $this->_get_current_branch();
-		$prefix = $this->_get_gitflow_prefix('feature');
-
-		if (!preg_match('~^' . preg_quote($prefix) . '~', $branch)) {
-			Garp_Cli::errorOut('You are not currently on a feature branch.');
-			return false;
-		}
-
-		$curr_feature = preg_replace('~^' . preg_quote($prefix) . '~', '', $branch);
-		$git_flow_feature_end_cmd = 'git flow feature finish ' . $curr_feature;
-		passthru($git_flow_feature_end_cmd);
 		return true;
 	}
 
