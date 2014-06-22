@@ -9,9 +9,10 @@
  */
 class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 
-	/**
- 	 * Overwrite to perform sanity checks
- 	 */
+	/** Cache git flow prefixes */
+	protected $_gitflow_prefixes = array();
+
+	/** Overwrite to perform sanity checks */
 	public function main(array $args = array()) {
 		// Sanity check: do you have the right tools for the job?
 		if (!$this->_required_tools_available()) {
@@ -23,49 +24,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 			return false;
 		}		
 
-
 		return parent::main($args);
-	}
-
-	/**
- 	 * Start a new release branch
- 	 */
-	public function startRelease(array $args = array()) {
-		// Can be minor, major, or 'special'
-		$type = isset($args[0]) ? $args[0] : 'minor';
-		$this->_bump_version($type);
-		$version = $this->_get_current_version();
-
-		// Stash cause we can't start the release until the git index is clean
-		$git_stash_cmd = 'git stash';
-		$this->_exec_cmd($git_stash_cmd);
-
-		$git_flow_start_release_cmd = 'git flow release start ' . $version;
-		$this->_exec_cmd($git_flow_start_release_cmd);
-
-		$git_stash_pop_cmd = 'git stash pop';
-		$this->_exec_cmd($git_stash_pop_cmd);
-
-		$git_add_cmd = 'git add .semver';
-		$this->_exec_cmd($git_add_cmd);
-
-		// Commit semver
-		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
-		$this->_exec_cmd($git_ci_cmd);
-		return true;
-	}
-
-	/**
- 	 * Finish current git flow release
- 	 */
-	public function finishRelease() {
-		$version = $this->_get_current_version();
-		if (!$this->_validate_branch('release', $version)) {
-			return false;
-		}
-		$git_flow_finish_release_cmd = 'git flow release finish -m "Release_' . $version . '" ' . $version;
-		passthru($git_flow_finish_release_cmd);
-		return true;
 	}
 
 	/**
@@ -108,42 +67,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return true;
 	}
 
-	/**
- 	 * Start feature branch
- 	 */
-	public function startFeature(array $args = array()) {
-		if (empty($args[0])) {
-			Garp_Cli::errorOut('No feature given. Do you want me to come up with a new feature myself?');
-			Garp_Cli::errorOut('(I suggest making me self-aware)');
-			return false;
-		}
-		$feature = $args[0];
-		$git_flow_feature_start_cmd = 'git flow feature start ' . $feature;
-		$this->_exec_cmd($git_flow_feature_start_cmd);
-		return true;
-	}
-
-	/**
- 	 * Finish feature branch
- 	 */
-	public function finishFeature(array $args = array()) {
-		$branch = $this->_get_current_branch();
-		$prefix = $this->_get_gitflow_prefix('feature');
-
-		if (!preg_match('~^' . preg_quote($prefix) . '~', $branch)) {
-			Garp_Cli::errorOut('You are not currently on a feature branch.');
-			return false;
-		}
-
-		$curr_feature = preg_replace('~^' . preg_quote($prefix) . '~', '', $branch);
-		$git_flow_feature_end_cmd = 'git flow feature finish ' . $curr_feature;
-		passthru($git_flow_feature_end_cmd);
-		return true;
-	}
-
-	/**
- 	 * Execute the given command
- 	 */
+	/** Execute the given command */
 	protected function _exec_cmd($cmd) {
 		return shell_exec($cmd);
 	}
@@ -193,9 +117,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return $branch;
 	}
 
-	/**
- 	 *
- 	 */
 	protected function _validate_branch($type, $suffix) {
 		$branch = $this->_get_current_branch();
 		$prefix = $this->_get_gitflow_prefix($type);
@@ -208,13 +129,14 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return false;
 	}		
 
-	/**
- 	 * Get the configured Git-flow prefix
- 	 */
+	/** Get the configured Git-flow prefix */
 	protected function _get_gitflow_prefix($category) {
-		$prefix = $this->_exec_cmd("git config gitflow.prefix.$category");
-		$prefix = trim($prefix);
-		return $prefix;
+		if (!isset($this->_gitflow_prefixes[$category])) {
+			$prefix = $this->_exec_cmd("git config gitflow.prefix.$category");
+			$prefix = trim($prefix);
+			$this->_gitflow_prefixes[$category] = $prefix;
+		}
+		return $this->_gitflow_prefixes[$category];
 	}
 
 	/**
