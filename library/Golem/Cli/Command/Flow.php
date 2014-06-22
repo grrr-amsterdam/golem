@@ -28,47 +28,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 	}
 
 	/**
- 	 * Start a new release branch
- 	 */
-	public function startRelease(array $args = array()) {
-		// Can be minor, major, or 'special'
-		$type = isset($args[0]) ? $args[0] : 'minor';
-		$this->_bump_version($type);
-		$version = $this->_get_current_version();
-
-		// Stash cause we can't start the release until the git index is clean
-		$git_stash_cmd = 'git stash';
-		$this->_exec_cmd($git_stash_cmd);
-
-		$git_flow_start_release_cmd = 'git flow release start ' . $version;
-		$this->_exec_cmd($git_flow_start_release_cmd);
-
-		$git_stash_pop_cmd = 'git stash pop';
-		$this->_exec_cmd($git_stash_pop_cmd);
-
-		$git_add_cmd = 'git add .semver';
-		$this->_exec_cmd($git_add_cmd);
-
-		// Commit semver
-		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
-		$this->_exec_cmd($git_ci_cmd);
-		return true;
-	}
-
-	/**
- 	 * Finish current git flow release
- 	 */
-	public function finishRelease() {
-		$version = $this->_get_current_version();
-		if (!$this->_validate_branch('release', $version)) {
-			return false;
-		}
-		$git_flow_finish_release_cmd = 'git flow release finish -m "Release_' . $version . '" ' . $version;
-		passthru($git_flow_finish_release_cmd);
-		return true;
-	}
-
-	/**
  	 * Start hotfix branch
  	 */
 	public function startHotfix(array $args = array()) {

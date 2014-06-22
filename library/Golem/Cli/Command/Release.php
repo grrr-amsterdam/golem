@@ -10,18 +10,32 @@
  */
 class Golem_Cli_Command_Release extends Golem_Cli_Command_Flow {
 
-	/**
- 	 * Start a git flow release
- 	 */
+	/** Start a git flow release */
 	public function start($args) {
-		return $this->startRelease($args);
+		// Can be minor, major, or 'special'
+		$type = isset($args[0]) ? $args[0] : 'minor';
+		$this->_bump_version($type);
+		$version = $this->_get_current_version();
+
+		// Stash cause we can't start the release until the git index is clean
+		$this->_exec_cmd('git stash');
+		$this->_exec_cmd('git flow release start ' . $version);
+		$this->_exec_cmd('git stash pop');
+		$this->_exec_cmd('git add .semver');
+
+		// Commit semver
+		$this->_exec_cmd('git commit -m "Incremented version to ' . $version . '."');
+		return true;
 	}
 
-	/**
- 	 * Finish a git flow release
- 	 */
+	/** Finish a git flow release */
 	public function finish($args) {
-		return $this->finishRelease($args);
+		$version = $this->_get_current_version();
+		if (!$this->_validate_branch('release', $version)) {
+			return false;
+		}
+		passthru('git flow release finish -m "Release_' . $version . '" ' . $version);
+		return true;
 	}
 
 	public function help() {
