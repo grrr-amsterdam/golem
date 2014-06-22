@@ -9,9 +9,10 @@
  */
 class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 
-	/**
- 	 * Overwrite to perform sanity checks
- 	 */
+	/** Cache git flow prefixes */
+	protected $_gitflow_prefixes = array();
+
+	/** Overwrite to perform sanity checks */
 	public function main(array $args = array()) {
 		// Sanity check: do you have the right tools for the job?
 		if (!$this->_required_tools_available()) {
@@ -107,9 +108,7 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return true;
 	}
 
-	/**
- 	 * Execute the given command
- 	 */
+	/** Execute the given command */
 	protected function _exec_cmd($cmd) {
 		return shell_exec($cmd);
 	}
@@ -159,9 +158,6 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return $branch;
 	}
 
-	/**
- 	 *
- 	 */
 	protected function _validate_branch($type, $suffix) {
 		$branch = $this->_get_current_branch();
 		$prefix = $this->_get_gitflow_prefix($type);
@@ -174,13 +170,14 @@ class Golem_Cli_Command_Flow extends Golem_Cli_Command {
 		return false;
 	}		
 
-	/**
- 	 * Get the configured Git-flow prefix
- 	 */
+	/** Get the configured Git-flow prefix */
 	protected function _get_gitflow_prefix($category) {
-		$prefix = $this->_exec_cmd("git config gitflow.prefix.$category");
-		$prefix = trim($prefix);
-		return $prefix;
+		if (!isset($this->_gitflow_prefixes[$category])) {
+			$prefix = $this->_exec_cmd("git config gitflow.prefix.$category");
+			$prefix = trim($prefix);
+			$this->_gitflow_prefixes[$category] = $prefix;
+		}
+		return $this->_gitflow_prefixes[$category];
 	}
 
 	/**
