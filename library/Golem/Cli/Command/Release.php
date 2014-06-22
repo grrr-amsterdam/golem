@@ -38,6 +38,26 @@ class Golem_Cli_Command_Release extends Golem_Cli_Command_Flow {
 		return true;
 	}
 
+	public function publish($args) {
+		$version = $this->_get_current_version();
+		if (!$this->_validate_branch('release', $version)) {
+			return false;
+		}
+
+		passthru('git flow release publish ' . $version);
+		return true;
+	}
+
+	public function track($args) {
+		if (empty($args)) {
+			Garp_Cli::errorOut('No release version provided.');
+			return false;
+		}
+		$branch = $args[0];
+		passthru('git flow release track ' . $branch);
+		return true;
+	}
+
 	public function help() {
 		Garp_Cli::lineOut('Usage:');
 		Garp_Cli::lineOut(' g release start', Garp_Cli::BLUE);
