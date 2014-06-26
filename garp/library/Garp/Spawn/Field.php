@@ -8,6 +8,7 @@ class Garp_Spawn_Field {
 	public $required = true;
 	public $type = 'text';
 	public $maxLength;
+	public $multiline;
 	public $label;
 	public $editable = true;
 	public $visible = true;
@@ -18,8 +19,9 @@ class Garp_Spawn_Field {
 	public $index;
 	public $multilingual = false;
 	public $comment;
+	public $wysiwyg = false;
 
-	
+
 	const TEXTFIELD_MAX_LENGTH = 124;
 
 	/** @var Array $options Optional values for an enum field */
@@ -37,7 +39,11 @@ class Garp_Spawn_Field {
 	/** @var String $origin Context in which this field is added. Can be 'config', 'default', 'relation' or 'behavior'. */
 	public $origin;
 
-	
+	/** @var String $relationType Type of singular relation that this field references.
+ 	 * Only set in case of singular relation fields. Can be 'hasOne' or 'belongsTo'. */
+	public $relationType;
+
+
 	protected $_types = array('text', 'html', 'email', 'url', 'numeric', 'checkbox', 'datetime', 'date', 'time', 'enum', 'document', 'imagefile');
 	protected $_defaultTypeByNameEnding = array(
 		'email' => 'email',
@@ -50,7 +56,7 @@ class Garp_Spawn_Field {
 
 
 	/**
-	* @param String $origin Context in which this field is added. Can be 'config', 'default' or 'behavior'.
+	* @param String $origin Context in which this field is added. Can be 'config', 'default', 'relation' or 'behavior'.
 	*/
 	public function __construct($origin, $name, array $config) {
 		$this->origin = $origin;
@@ -68,16 +74,16 @@ class Garp_Spawn_Field {
 	public function isMultilingual() {
 		return $this->multilingual;
 	}
-	
+
 	public function isRelationField() {
 		return $this->origin === 'relation';
 	}
-	
+
 	public function isSuitableAsLabel() {
 		$nonLabelFieldTypes 	= array('html', 'checkbox');
 		$isSuitableType 		= !in_array($this->type, $nonLabelFieldTypes);
 		$isSuitableField		= $isSuitableType && !$this->isRelationField();
-		
+
 		return $isSuitableField;
 	}
 
@@ -147,6 +153,10 @@ class Garp_Spawn_Field {
 						$this->maxLength = self::TEXTFIELD_MAX_LENGTH;
 					}
 			}
+		}
+
+		if (!array_key_exists('multiline', $config) && $this->isTextual()) {
+			$this->multiline = !$this->maxLength || $this->maxLength > self::TEXTFIELD_MAX_LENGTH;
 		}
 
 		if ($this->type === 'checkbox') {
