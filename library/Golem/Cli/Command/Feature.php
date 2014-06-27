@@ -17,6 +17,9 @@ class Golem_Cli_Command_Feature extends Golem_Cli_Command_Flow {
 			return false;
 		}
 		$feature = $args[0];
+		if ($name = $this->_getAuthorName()) {
+			$feature = $name . '-' . $feature;
+		}
 		$git_flow_feature_start_cmd = 'git flow feature start ' . $feature;
 		$this->_exec_cmd($git_flow_feature_start_cmd);
 		return true;
@@ -61,6 +64,15 @@ class Golem_Cli_Command_Feature extends Golem_Cli_Command_Flow {
 		$git_flow_feature_publish_cmd = 'git flow feature track ' . $branch;
 		passthru($git_flow_feature_publish_cmd);
 		return true;
+	}
+
+	protected function _getAuthorName() {
+		$name = $this->_exec_cmd("git config user.name");
+		if (!$name) {
+			return '';
+		}
+		$name = explode(' ', $name);
+		return strtolower($name[0]);
 	}
 
 	public function help() {
