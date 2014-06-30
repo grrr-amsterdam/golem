@@ -9,18 +9,17 @@
  */
 class Golem_Cli_Command_Ssh extends Golem_Cli_Command {
 		
-	public function main(array $args = array()) {
+	public function staging() {
+		$this->_openConnection('staging');
+	}
+
+	public function production() {
+		$this->_openConnection('production');
+	}
+
+	public function _openConnection($environment) {
 		$ssh_helper_path = GOLEM_APPLICATION_PATH . '/../scripts/ssh_helper.rb';
 		$deploy_rb_path = APPLICATION_PATH . '/configs/deploy.rb';
-
-		if (empty($args)) {
-			Garp_Cli::errorOut('Please provide an environment');
-			Garp_Cli::lineOut('Usage:');
-			Garp_Cli::lineOut(' g ssh staging', Garp_Cli::BLUE);
-			return false;
-		}
-
-		$environment = $args[0];
 
 		// sanity check
 		if (!file_exists($deploy_rb_path)) {
@@ -50,4 +49,9 @@ class Golem_Cli_Command_Ssh extends Golem_Cli_Command {
 			'@' . escapeshellarg($settings['server']));
 	}
 
+	public function help() {
+		Garp_Cli::lineOut('Usage:');
+		Garp_Cli::lineOut(' g ssh staging', Garp_Cli::BLUE);
+		return true;
+	}		
 }
