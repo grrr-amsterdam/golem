@@ -71,6 +71,7 @@ class Golem_Cli_Command_Feature extends Golem_Cli_Command_Flow {
 		if (!$name) {
 			return '';
 		}
+		$name = trim($name);
 		$name = explode(' ', $name);
 		return strtolower($name[0]);
 	}
