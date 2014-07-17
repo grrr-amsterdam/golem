@@ -14,3 +14,4 @@ public/uploads/shared/**/*
 application/data/.golemrc
 Blackhole.php
 node_modules
+tags
