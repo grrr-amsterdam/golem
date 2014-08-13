@@ -36,6 +36,7 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
 		Garp_Cli::lineOut('Welcome to the Garp interactive shell.', Garp_Cli::YELLOW);
 		Garp_Cli::lineOut('Use Ctrl-C to quit.');
 
+		$this->_setErrorHandler();
 		$this->_tick();
 	}
 
@@ -132,4 +133,16 @@ class Golem_Cli_Command_Shell extends Golem_Cli_Command {
 		return $this->_input ? self::MULTILINE_PROMPT : self::SINGLE_LINE_PROMPT;
 	}
 
+	protected function _setErrorHandler() {
+		set_error_handler(function($errno, $errstr, $errfile, $errline) {
+			$errTypes = array(
+				E_USER_ERROR => 'Error',
+				E_USER_WARNING => 'Warning',
+				E_USER_NOTICE => 'Notice'
+			);
+			$errType = isset($errTypes[$errno]) ? $errTypes[$errno] : 'Unknown error';
+			Garp_Cli::errorOut("{$errType}: {$errstr}");
+ 		   	Garp_Cli::lineOut(" from {$errfile}:{$errline}", Garp_Cli::BLUE);
+		});
+	}		
 }
