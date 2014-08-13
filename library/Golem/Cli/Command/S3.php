@@ -1,7 +1,7 @@
 <?php
 /**
  * Golem_Cli_Command_S3
- * Wrapper around awscmd, specific to s3 commands
+ * Wrapper around awscmd, specific to s3 and s3api commands.
  *
  * @author       Harmen Janssen | grrr.nl
  * @version      0.1.0
@@ -34,17 +34,28 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		return $this->makeBucket($args);
 	}
 
-	public function ls() {
-		$config = Zend_Registry::get('config');
-		if (empty($config->cdn->s3->bucket)) {
+	public function ls(array $args = array()) {
+		if (empty(Zend_Registry::get('config')->cdn->s3->bucket)) {
 			Garp_Cli::errorOut('No bucket configured');
 			return false;
 		}
-		$args = array(
-			's3://' . $config->cdn->s3->bucket
-		);
+		$path = rtrim('s3://' . Zend_Registry::get('config')->cdn->s3->bucket, DIRECTORY_SEPARATOR);
+		if (isset($args[0])) {
+			$path .= DIRECTORY_SEPARATOR . $args[0];
+		}
+		$args = array($path);
 
 		return $this->s3('ls', $args);
+	}
+
+	/**
+ 	 * Set CORS settings on bucket
+ 	 */
+	public function cors() {
+		// aws s3api put-bucket-cors --bucket static.melkweg.nl --profile=melkweg_production --cors-configuration '{ "CORSRules": [{ "AllowedHeaders": ["*"], "AllowedMethods": ["GET"], "AllowedOrigins": ["*"] }] }'
+
+		//$args = array(
+		return $this->s3api('put-bucket-cors', $args); 
 	}
 
 }
