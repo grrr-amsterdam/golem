@@ -44,18 +44,34 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 			$path .= DIRECTORY_SEPARATOR . $args[0];
 		}
 		$args = array($path);
-
 		return $this->s3('ls', $args);
 	}
 
 	/**
  	 * Set CORS settings on bucket
  	 */
-	public function cors() {
+	public function setCors() {
 		// aws s3api put-bucket-cors --bucket static.melkweg.nl --profile=melkweg_production --cors-configuration '{ "CORSRules": [{ "AllowedHeaders": ["*"], "AllowedMethods": ["GET"], "AllowedOrigins": ["*"] }] }'
-
-		$args = array();
+		// {"CORSRules":[{"AllowedHeaders":["*"],"AllowedMethods":["GET"],"AllowedOrigins":["*"]}]}
+		$corsConfig = array(
+			'CORSRules' => array(array(
+				'AllowedHeaders' => array('*'),
+				'AllowedMethods' => array('GET'),
+				'AllowedOrigins' => array('*'),
+			))
+		);
+		//Garp_Cli::lineOut(json_encode($corsConfig)); exit;
+		$args = array(
+			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+			'--cors-configuration' => "'" . json_encode($corsConfig) . "'"
+		);
 		return $this->s3api('put-bucket-cors', $args); 
 	}
 
+	public function getCors() {
+		$args = array(
+			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+		);
+		return $this->s3api('get-bucket-cors', $args);
+	}
 }
