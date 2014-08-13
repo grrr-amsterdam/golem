@@ -38,10 +38,15 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
  	 * Execute s3 methods
  	 * @param String $cmd The command (for instance 'ls')
  	 * @param Array $args Various arguments
- 	 * return Void
  	 */
 	public function s3($cmd, $args) {
 		$this->_exec('s3', $cmd, $args);
+		return true;
+	}
+
+	public function s3api($cmd, $args) {
+		$this->_exec('s3api', $cmd, $args);
+		return true;
 	}
 
 	/** Display help */
@@ -86,7 +91,8 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		$confStr = "[profile {$this->_profile}]\n";
 		$confStr .= "aws_access_key_id = {$config->cdn->s3->apikey}\n";
 		$confStr .= "aws_secret_access_key = {$config->cdn->s3->secret}\n";
-		$confStr .= "output = json\n\n";
+		$confStr .= "output = json\n";
+		$confStr .= "region = eu-west-1\n\n";
 
 		$homeDir = trim(`echo \$HOME`);
 		file_put_contents($homeDir . DIRECTORY_SEPARATOR . self::AWS_CONFIG_LOCATION, $confStr, FILE_APPEND);
