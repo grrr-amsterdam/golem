@@ -54,7 +54,7 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 	public function cors() {
 		// aws s3api put-bucket-cors --bucket static.melkweg.nl --profile=melkweg_production --cors-configuration '{ "CORSRules": [{ "AllowedHeaders": ["*"], "AllowedMethods": ["GET"], "AllowedOrigins": ["*"] }] }'
 
-		//$args = array(
+		$args = array();
 		return $this->s3api('put-bucket-cors', $args); 
 	}
 

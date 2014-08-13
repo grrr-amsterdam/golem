@@ -66,6 +66,7 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		$cmd = "aws $group $subCmd ";
 		$cmd .= implode(' ', $args);
 		$cmd .= ' --profile=' . $this->_profile;
+		exit($cmd . "\n");
 		passthru($cmd);
 	}
 
