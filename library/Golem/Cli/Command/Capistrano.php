@@ -134,7 +134,7 @@ class Golem_Cli_Command_Capistrano extends Golem_Cli_Command {
 	protected function _writeDeployConfigNewStyle(array $config) {
 		$configOutput = <<<EOF
 server '{$config['server']}', user: '{$config['user']}', roles: %w{web app}
-set :deploy_to, "{$config['server']}"
+set :deploy_to, "{$config['deploy_to']}"
 set :garp_env, "{$config['garp_env']}"
 EOF;
 
