@@ -59,8 +59,28 @@ class Golem_Cli_Command_Capistrano extends Golem_Cli_Command {
 	protected function _updateVersionSteps() {
 		$this->_replaceCapFile();
 		$this->_restructureDeployRb();
+		$this->_replaceSharedCachePathConfig();
 		$this->_replaceSharedUploadPathConfig();
 		$this->_removeSharedUploadSymlink();
+	}
+
+	protected function _replaceSharedCachePathConfig() {
+		$path = 'application/configs/';
+		$files = array('application.ini', 'cache.ini');
+
+		foreach ($files as $file) {
+			if (!file_exists($path . $file)) {
+				continue;
+			}
+
+			$content = file_get_contents($path . $file);
+
+			$baseLine = 'resources.cacheManager.pagetag.backend.options.cache_dir = APPLICATION_PATH "';
+			$oldLine = $baseLine . '/../../../shared/tags"';
+			$newLine = $baseLine . '/data/cache/tags"';
+			$content = str_replace($oldLine, $newLine, $content);
+			file_put_contents($path . $file, $content);
+		}
 	}
 
 	protected function _replaceSharedUploadPathConfig() {
