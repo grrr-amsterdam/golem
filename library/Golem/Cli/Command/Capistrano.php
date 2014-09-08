@@ -171,7 +171,7 @@ EOF;
 	}
 
 	protected function _extractServer($haystack) {
-		$pattern = "/server \"([\w\.]+)\"/";
+		$pattern = "/server \"([\w\.-]+)\"/";
 		return $this->_extractAbstract($pattern, $haystack);
 	}
 
