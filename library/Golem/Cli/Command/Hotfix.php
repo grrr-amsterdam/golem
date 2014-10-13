@@ -20,12 +20,22 @@ class Golem_Cli_Command_Hotfix extends Golem_Cli_Command_Flow {
 
 		$git_flow_start_release_cmd = 'git flow hotfix start ' . $version;
 		$this->_exec_cmd($git_flow_start_release_cmd);
+
+		$this->_bump_version('patch');
+
+		// Add semver
+		$git_add_cmd = 'git add .semver';
+		$this->_exec_cmd($git_add_cmd);
+
+		// Commit semver
+		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
+		$this->_exec_cmd($git_ci_cmd);
+
 		return true;
 	}
 
 	/** Finish hotfix branch */
 	public function finish(array $args = array()) {
-		$this->_bump_version('patch');
 		$version = $this->_get_current_version();
 		if (!$this->_validate_branch('hotfix', $version)) {
 			// When shit hits the fan: revert semver
@@ -33,13 +43,6 @@ class Golem_Cli_Command_Hotfix extends Golem_Cli_Command_Flow {
 			$this->_exec_cmd($git_co_cmd);
 			return false;
 		}
-
-		$git_add_cmd = 'git add .semver';
-		$this->_exec_cmd($git_add_cmd);
-
-		// Commit semver
-		$git_ci_cmd  = 'git commit -m "Incremented version to ' . $version . '."';
-		$this->_exec_cmd($git_ci_cmd);
 
 		$finish_hotfix_cmd = 'git flow hotfix finish -m "Hotfix_' . $version . '" ' . $version;
 		passthru($finish_hotfix_cmd);
