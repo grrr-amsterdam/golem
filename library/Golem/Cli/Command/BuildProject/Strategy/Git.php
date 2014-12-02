@@ -12,7 +12,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 	 * Garp3 repository URL
 	 * @var String
 	 */
-	const GARP3_REPO = 'git@code.grrr.nl:grrr/garp3';
+	const GARP3_REPO = 'git@github.com:grrr-amsterdam/garp3';
 
 	/**
 	 * Zend Framework repository
@@ -110,7 +110,7 @@ class Golem_Cli_Command_BuildProject_Strategy_Git implements Golem_Cli_Command_B
 
 		// Copy scaffold files
 		$scaffold = new Golem_Scaffold(
-			'git@code.grrr.nl:grrr/garp_scaffold',
+			'git@github.com:grrr-amsterdam/garp_scaffold',
 			getcwd()
 		);
 		$scaffold->setup();
