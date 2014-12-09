@@ -7,6 +7,7 @@
  * @package      Golem_Cli_Command
  */
 class Golem_Cli_Command_Capistrano extends Golem_Cli_Command {
+	const CAPFILE_REPO_URL = "https://github.com/grrr-amsterdam/garp_scaffold/trunk/Capfile";
 
 
 	/**
@@ -106,7 +107,8 @@ class Golem_Cli_Command_Capistrano extends Golem_Cli_Command {
 	}
 
 	protected function _replaceCapFile() {
-		`git archive --remote=git@bitbucket.org:grrr/garp_scaffold.git HEAD Capfile | tar -x`;
+		$command = "svn export " . self::CAPFILE_REPO_URL . " --force";
+		`$command`;
 	}
 
 	protected function _restructureDeployRb() {
