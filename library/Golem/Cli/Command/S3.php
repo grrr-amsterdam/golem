@@ -47,6 +47,30 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		return $this->s3('ls', $args);
 	}
 
+	public function rm(array $args = array()) {
+		if (empty(Zend_Registry::get('config')->cdn->s3->bucket)) {
+			Garp_Cli::errorOut('No bucket configured');
+			return false;
+		}
+
+		if (empty($args)) {
+			Garp_Cli::errorOut('No path given.');
+			return false;
+		}
+
+		$path = rtrim('s3://' . Zend_Registry::get('config')->cdn->s3->bucket, DIRECTORY_SEPARATOR);
+		if (!Garp_Cli::confirm('Are you sure you want to permanently remove ' .
+			$path . '?')) {
+			Garp_Cli::lineOut('Changed your mind, huh? Not deleting.');
+			return true;
+		}
+		if (isset($args[0])) {
+			$path .= DIRECTORY_SEPARATOR . $args[0];
+		}
+		$args = array($path);
+		return $this->s3('rm', $args);
+	}
+
 	/**
  	 * Set CORS settings on bucket
  	 * @todo Make CORS options configurable? Do you ever want full-fletched control over these?
@@ -63,7 +87,7 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
 			'--cors-configuration' => "'" . json_encode($corsConfig) . "'"
 		);
-		return $this->s3api('put-bucket-cors', $args); 
+		return $this->s3api('put-bucket-cors', $args);
 	}
 
 	public function getCors() {
@@ -71,5 +95,18 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
 		);
 		return $this->s3api('get-bucket-cors', $args);
+	}
+
+	public function help() {
+		parent::help();
+
+		Garp_Cli::lineOut('');
+		Garp_Cli::lineOut('Create a bucket:');
+		Garp_Cli::lineOut(' g s3 mb my_bucket', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('View a directory listing:');
+		Garp_Cli::lineOut(' g s3 ls uploads/images/', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Remove a file:');
+		Garp_Cli::lineOut(' g s3 rm uploads/images/embarrassing_photo.jpg', Garp_Cli::BLUE);
+
 	}
 }

@@ -54,6 +54,10 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		Garp_Cli::lineOut('This is a wrapper around Amazon awscmd.', Garp_Cli::YELLOW);
 		Garp_Cli::lineOut("Make sure it's installed on your machine (go to http://aws.amazon.com/cli/ for instructions)");
 		Garp_Cli::lineOut('Note that this wrapper manages your awscmd profiles for you.');
+
+		Garp_Cli::lineOut('');
+		Garp_Cli::lineOut('Use S3 accounts of various environments by adding the usual --e parameter:');
+		Garp_Cli::lineOut(' g aws s3 ls uploads/ --e=production', Garp_Cli::BLUE);
 	}
 
 	/**
@@ -65,7 +69,7 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 	protected function _exec($group, $subCmd, $args) {
 		$args['--profile'] = $this->_profile;
 		$keys = array_keys($args);
-		// Sort 
+		// Sort
 		sort($keys);
 		$cmd = "aws $group $subCmd";
 		foreach ($keys as $key) {
@@ -98,7 +102,7 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		$confStr .= "aws_access_key_id = {$config->cdn->s3->apikey}\n";
 		$confStr .= "aws_secret_access_key = {$config->cdn->s3->secret}\n";
 		$confStr .= "output = json\n";
-		$confStr .= "region = eu-west-1\n\n";
+		$confStr .= "region = eu-central-1\n\n";
 
 		$homeDir = trim(`echo \$HOME`);
 		file_put_contents($homeDir . DIRECTORY_SEPARATOR . self::AWS_CONFIG_LOCATION, $confStr, FILE_APPEND);
