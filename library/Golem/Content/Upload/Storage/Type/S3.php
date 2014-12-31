@@ -1,7 +1,7 @@
 <?php
 /**
  * Golem_Content_Upload_Storage_Type_S3
- * 
+ *
  * @author David Spreekmeester | grrr.nl
  * @modifiedby $LastChangedBy: $
  * @version $Revision: $
@@ -23,7 +23,7 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 		$fileList 			= new Golem_Content_Upload_FileList();
 		$service 			= $this->_getService();
 		$uploadTypePaths 	= $this->_getConfiguredPaths();
-		
+
 		foreach ($uploadTypePaths as $type => $dirPath) {
 			$service->setPath($dirPath);
 			$dirList 		= $service->getList();
@@ -33,8 +33,8 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 
 		return $fileList;
 	}
-	
-	
+
+
 	/**
 	 * @param Array 	$dirList	Array of file paths
 	 * @param String 	$type		Upload type
@@ -49,11 +49,11 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 				$fileList->addEntry($fileNode);
 			}
 		}
-		
+
 		return $fileList;
 	}
-	
-	
+
+
 	protected function _isFilePath($path) {
 		return $path[strlen($path) - 1] !== '/';
 	}
@@ -85,19 +85,23 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 	 */
 	public function fetchData($filename, $type) {
 		$relPath	= $this->_getRelPath($filename, $type);
+		//return $this->_getService()->fetch($relPath);
 		$ini 		= $this->_getIni();
 		$cdnDomain 	= $ini->cdn->domain;
 		$url 		= 'http://' . $cdnDomain . $relPath;
 
 		$content = @file_get_contents($url);
-		if ($content !== false) {
-			return $content;
+		if ($content === false) {
+			throw new Exception("Could not read {$url} on " . $this->getEnvironment());
 		}
-		
-		throw new Exception("Could not read {$url} on " . $this->getEnvironment());
+
+		// Check for gzipped content
+		$unpacked = @gzdecode($content);
+		$content = null !== $unpacked && false !== $unpacked ? $unpacked : $content;
+		return $content;
 	}
-	
-	
+
+
 	/**
 	 * Stores given data in the file, overwriting the existing bytes if necessary.
 	 * @param 	String $filename 	Filename
@@ -115,7 +119,7 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 	}
 
 
-	/**
+	/*
 	 * @param 	String $path 	Relative path to the file.
 	 * @return 	String 			The relative path to the directory where the file resides.
 	 */
@@ -129,8 +133,8 @@ class Golem_Content_Upload_Storage_Type_S3 extends Golem_Content_Upload_Storage_
 	protected function _getService() {
 		return $this->_service;
 	}
-	
-	
+
+
 	protected function _setService() {
 		if (!$this->_service) {
 			$ini = $this->_getIni();
