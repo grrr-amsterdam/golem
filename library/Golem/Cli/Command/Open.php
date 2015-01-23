@@ -9,7 +9,13 @@
  */
 class Golem_Cli_Command_Open extends Golem_Cli_Command {
 	public function main(array $args = array()) {
-		$domain = Zend_Registry::get('config')->app->domain;
+		$domain = isset(Zend_Registry::get('config')->app->domain) ?
+			Zend_Registry::get('config')->app->domain : null;
+		if (!$domain) {
+			Garp_Cli::errorOut('No domain found. Please configure app.domain');
+			return false;
+		}
 		`open http://$domain`;
+		return true;
 	}
 }
