@@ -67,16 +67,15 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
  	 * @param Array $args Further commandline arguments
  	 */
 	protected function _exec($group, $subCmd, $args) {
-		$args['--profile'] = $this->_profile;
 		$keys = array_keys($args);
-		// Sort
-		sort($keys);
 		$cmd = "aws $group $subCmd";
 		foreach ($keys as $key) {
-			$cmd .= is_numeric($key) ? ' ' : " {$key} ";
-			$cmd .= $args[$key];
+			$cmd .= is_numeric($key) ? ' ' : " --{$key}";
+			$cmd .= true === $args[$key] ? '' : $args[$key];
 		}
-		passthru($cmd);
+
+		$cmd .= " --profile {$this->_profile}";
+		return passthru($cmd);
 	}
 
 	/** Set the current profile */

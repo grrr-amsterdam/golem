@@ -23,10 +23,9 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 			Garp_Cli::errorOut('No bucket configured');
 			return false;
 		}
-		$args = array(
+		return $this->s3('mb', array(
 			's3://' . $bucket
-		);
-		return $this->s3('mb', $args);
+		));
 	}
 
 	/** Alias for makeBucket */
@@ -45,6 +44,18 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		}
 		$args = array($path);
 		return $this->s3('ls', $args);
+	}
+
+	public function cp(array $args = array()) {
+		return $this->s3('cp', $args);
+	}
+
+	public function m(array $args = array()) {
+		return $this->s3('mv', $args);
+	}
+
+	public function sync(array $args = array()) {
+		return $this->s3('sync', $args);
 	}
 
 	public function rm(array $args = array()) {
