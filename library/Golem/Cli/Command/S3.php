@@ -70,13 +70,13 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		}
 
 		$path = rtrim('s3://' . Zend_Registry::get('config')->cdn->s3->bucket, DIRECTORY_SEPARATOR);
+		if (isset($args[0])) {
+			$path .= DIRECTORY_SEPARATOR . $args[0];
+		}
 		if (!Garp_Cli::confirm('Are you sure you want to permanently remove ' .
 			$path . '?')) {
 			Garp_Cli::lineOut('Changed your mind, huh? Not deleting.');
 			return true;
-		}
-		if (isset($args[0])) {
-			$path .= DIRECTORY_SEPARATOR . $args[0];
 		}
 		$args = array($path);
 		return $this->s3('rm', $args);
