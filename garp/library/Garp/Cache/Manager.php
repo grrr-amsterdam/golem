@@ -39,6 +39,10 @@ class Garp_Cache_Manager {
 	 * @return Void
 	 */
 	public static function purge($tags = array(), $createClusterJob = true, $cacheDir = false) {
+		if ($tags instanceof Garp_Model_Db) {
+            $tags = self::getTagsFromModel($tags);
+        }
+
 		self::purgeStaticCache($tags, $cacheDir);
 		self::purgeMemcachedCache($tags);
 		self::purgePluginLoaderCache();
@@ -170,7 +174,8 @@ class Garp_Cache_Manager {
 		// Add timestamp to the filename so we can safely delete the file later
 		$tags = implode(' ', $tags);
 		$file = APPLICATION_PATH.'/data/at_cmd_'.time().md5($tags);
-		$garpScriptFile = realpath(APPLICATION_PATH.'/../garp/scripts/garp.php');
+
+		$garpScriptFile = self::_getGarpCliScriptPath();
 		$cmd  = 'php '.$garpScriptFile.' Cache clear --APPLICATION_ENV='.APPLICATION_ENV.' '.$tags.';';
 
 		// Create temp file
@@ -262,5 +267,15 @@ class Garp_Cache_Manager {
 		}
 
 		return null;
+	}
+
+	protected static function _getGarpCliScriptPath() {
+		if (strpos(APPLICATION_PATH, 'releases') === false) {
+			return realpath(APPLICATION_PATH . '/../garp/scripts/garp.php');
+		}
+		// When `releases` is in the path, assume Capistrano setup and point to the `current`
+		// symlink. The different release folders are purged over time, so not reliable to use when
+		// scheduling a future operation.
+		return realpath(APPLICATION_PATH . '/../../..') . '/current/garp/scripts/garp.php';
 	}
 }

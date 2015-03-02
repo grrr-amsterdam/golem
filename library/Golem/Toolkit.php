@@ -12,7 +12,7 @@ class Golem_Toolkit {
  	 * Relative location of .golemrc
  	 * @var String
  	 */
-	const GOLEMRC = '/data/.golemrc'; 
+	const GOLEMRC = '/data/.golemrc';
 
 	/**
  	 * Flag used to silence Golem
@@ -23,19 +23,19 @@ class Golem_Toolkit {
 	/**
  	 * @var Golem_Toolkit
  	 */
-	protected static $_instance; 
+	protected static $_instance;
 
 	/**
  	 * Golem configuration
  	 * @var Golem_Rc
  	 */
-	protected $_rc; 
+	protected $_rc;
 
 	/**
  	 * Project folders
  	 * @var Array
  	 */
-	protected $_projects; 
+	protected $_projects;
 
 	/**
  	 * Commands that do not act upon an existing project
@@ -43,7 +43,7 @@ class Golem_Toolkit {
  	 */
 	protected static $_sysCommands = array(
 		'sys', 'build', 'checkout', 'vhost', 'complete'
-	); 
+	);
 
 	/**
  	 * Singleton interface
@@ -55,7 +55,7 @@ class Golem_Toolkit {
 			self::$_instance = new Golem_Toolkit($golemRc);
 		}
 		return self::$_instance;
-	} 
+	}
 
 	/**
  	 * Class constructor
@@ -64,7 +64,7 @@ class Golem_Toolkit {
  	 */
 	protected function __construct(Golem_Rc $golemRc) {
 		$this->setRc($golemRc);
-	} 
+	}
 
 	/**
  	 * Main startup method
@@ -112,12 +112,12 @@ class Golem_Toolkit {
 		// Last but not least, execute the command.
 		$success = $this->executeCommand($cmd, $args);
 		return $success;
-	} 
+	}
 
 	/**
  	 * Execute a Garp_Cli_Command.
  	 * @param Mixed $cmd Either a Garp_Cli_Command instance, or the suffix of its classname.
- 	 * @param Array $args 
+ 	 * @param Array $args
  	 * @return Boolean
  	 */
 	public function executeCommand($cmd, array $args = array()) {
@@ -126,11 +126,11 @@ class Golem_Toolkit {
 		}
 		$response = $cmd->main($args);
 		return $response;
-	} 
+	}
 
 	/**
  	 * Parse commandline arguments into project, command and arguments
- 	 * @param Array $args 
+ 	 * @param Array $args
 	 * @return Array Containing (0) Project name, (1) Cmd name, (2) Arguments
  	 */
 	protected function _parseArgs(array $args) {
@@ -166,7 +166,7 @@ class Golem_Toolkit {
 		$cmd     = $args[$cmdIndex];
 		$cmdArgs = array_slice($args, $cmdIndex+1);
 		return array($project, $cmd, $cmdArgs);
-	} 
+	}
 
 	/**
  	 * Load command class
@@ -190,7 +190,7 @@ class Golem_Toolkit {
 		}
 		$this->_throwException('InvalidCmd', 'Command '.$cmd.' not found '.
 			'in any of the available namespaces. ('.implode(',', $prefixes).')');
-	} 
+	}
 
 	/**
  	 * Check if given command is sys command (a command that does not act upon a project).
@@ -199,7 +199,7 @@ class Golem_Toolkit {
  	 */
 	public function isSysCommand($cmd) {
 		return in_array($cmd, $this->getSysCommands());
-	} 
+	}
 
 	/**
  	 * Grab all sys commands
@@ -229,7 +229,7 @@ class Golem_Toolkit {
 			// @todo Is it right to exit here? If a developer was executing a command, he needs to do it again.
 			Garp_Cli::halt($success);
 		}
-	} 
+	}
 
 	/**
  	 * Get GolemRc
@@ -237,7 +237,7 @@ class Golem_Toolkit {
  	 */
 	public function getRc() {
 		return $this->_rc;
-	} 
+	}
 
 	/**
  	 * Get Garp projects
@@ -248,7 +248,7 @@ class Golem_Toolkit {
 			$this->_projects = $this->_collectProjectList();
 		}
 		return $this->_projects;
-	} 
+	}
 
 	/**
  	 * Iterate workspace directory to gather project folders.
@@ -268,11 +268,11 @@ class Golem_Toolkit {
 			}
 		}
 		return $projects;
-	} 
+	}
 
 	/**
  	 * Check if a given path is a Garp project.
- 	 * Note: you can never know for sure, we simply use duck typing to see if 
+ 	 * Note: you can never know for sure, we simply use duck typing to see if
  	 * it looks like a Garp setup.
  	 * @param String $path
  	 * @return Boolean
@@ -284,7 +284,7 @@ class Golem_Toolkit {
 		return file_exists($garpFolder) &&
 			file_exists($appFolder) &&
 			file_exists($publicFolder);
-	} 
+	}
 
 	/**
  	 * Check if our current pwd is in a Garp project.
@@ -306,7 +306,7 @@ class Golem_Toolkit {
 			return $currFolder;
 		}
 		return false;
-	} 
+	}
 
 	/**
  	 * Cd into the given project.
@@ -320,7 +320,7 @@ class Golem_Toolkit {
 			$this->_throwException('InvalidProject', 'Unable to enter project '.$project);
 		}
 		chdir($projectPath);
-	} 
+	}
 
 	/**
  	 * Return all available namespaces.
@@ -333,7 +333,7 @@ class Golem_Toolkit {
 			$namespaces[] = 'Golem';
 		}
 		$namespaces[] = 'Garp';
-		
+
 		// Allow namespaces to be configured in ini file.
 		$config = Zend_Registry::get('config');
 		if (!empty($config->cli->namespaces)) {
@@ -364,7 +364,7 @@ class Golem_Toolkit {
 
 		// Still nothing? That's not right...
 		return null;
-	} 
+	}
 
 	/**
  	 * Throw an exception.
@@ -372,7 +372,7 @@ class Golem_Toolkit {
  	 * (we cannot assume autoloading is setup at this point)
  	 * @param String $type Type of exception (And class suffix)
  	 * @param String $err Error message
- 	 * @return Void 
+ 	 * @return Void
  	 * @throws Golem_Exception
  	 */
 	protected function _throwException($type, $err) {

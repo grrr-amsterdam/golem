@@ -245,7 +245,7 @@ Garp.imageTpl = new Ext.XTemplate(['<tpl if="caption">', '<tpl if="align">', '<f
 /**
  * Video Template for embeding videos
  */
-Garp.videoTpl = new Ext.XTemplate('<iframe width="{width}" height="{height}" src="{player}" frameborder="0"></iframe>');
+Garp.videoTpl = new Ext.XTemplate('<figure class="video-embed"><iframe width="{width}" height="{height}" src="{player}" frameborder="0"></iframe></figure>');
 
 /**
  * Ext.Panel setTitle override for TabPanels (ellipsis added)
@@ -599,3 +599,94 @@ Ext.override(Ext.PagingToolbar, {
         this.cursor = 0;
         this.bindStore(this.store, true);
     }});
+
+
+/**
+ * Overrides for propertygrid & column: no sorting by default, and support for 'required' property marking:
+ */
+
+Ext.override(Ext.grid.PropertyGrid, {
+	initComponent : function() {
+		this.customRenderers = this.customRenderers || {};
+		this.customEditors = this.customEditors || {};
+		this.lastEditRow = null;
+		var store = new Ext.grid.PropertyStore(this);
+		this.propStore = store;
+		var cm = new Ext.grid.PropertyColumnModel(this, store);
+		//store.store.sort('name', 'ASC');
+		this.addEvents('propertychange');
+		this.cm = cm;
+		this.ds = store.store;
+		Ext.grid.PropertyGrid.superclass.initComponent.call(this);
+
+		this.mon(this.selModel, 'beforecellselect', function(sm, rowIndex, colIndex) {
+			if (colIndex === 0) {
+				this.startEditing.defer(200, this, [rowIndex, 1]);
+				return false;
+			}
+		}, this);
+	}
+});
+
+Ext.override(Ext.grid.PropertyColumnModel, {
+	constructor : function(grid, store) {
+
+		var g = Ext.grid, f = Ext.form;
+
+		this.grid = grid;
+		g.PropertyColumnModel.superclass.constructor.call(this, [{
+			header : this.nameText,
+			width : 50,
+			sortable : false,
+			dataIndex : 'name',
+			id : 'name',
+			menuDisabled : true
+		}, {
+			header : this.valueText,
+			width : 50,
+			resizable : false,
+			dataIndex : 'value',
+			id : 'value',
+			menuDisabled : true
+		}]);
+		this.store = store;
+
+		var bfield = new f.Field({
+			autoCreate : {
+				tag : 'select',
+				children : [{
+					tag : 'option',
+					value : 'true',
+					html : this.trueText
+				}, {
+					tag : 'option',
+					value : 'false',
+					html : this.falseText
+				}]
+			},
+			getValue : function() {
+				return this.el.dom.value == 'true';
+			}
+		});
+		this.editors = {
+			'date' : new g.GridEditor(new f.DateField({selectOnFocus : true})),
+			'string' : new g.GridEditor(new f.TextField({selectOnFocus : true})),
+			'number' : new g.GridEditor(new f.NumberField({selectOnFocus : true,style : 'text-align:left;'})),
+			'boolean' : new g.GridEditor(bfield, {autoSize : 'both'})
+		};
+		this.renderCellDelegate = this.renderCell.createDelegate(this);
+		this.renderPropDelegate = this.renderProp.createDelegate(this);
+	},
+
+	requiredPropertyRenderer : function(v, m, r) {
+		var ce = this.grid.customEditors;
+		if(ce[r.id] && ce[r.id].field && ce[r.id].field.allowBlank === false){
+			m.css = 'required-property';
+		}
+		return this.renderProp(v);
+	},
+
+	getRenderer : function(col) {
+		return (col === 0 ? this.requiredPropertyRenderer.createDelegate(this) : (this.renderCellDelegate || this.renderPropDelegate));
+	}
+}); 

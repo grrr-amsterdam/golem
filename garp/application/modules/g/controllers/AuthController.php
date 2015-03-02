@@ -65,7 +65,9 @@ class G_AuthController extends Garp_Controller_Action {
 			// Before register hook
 			$this->_beforeRegister($postData);
 
-			$insertId = $userModel->insert($postData);
+			// Extract columns that are not part of the user model
+			$userData = $userModel->filterColumns($postData);
+			$insertId = $userModel->insert($userData);
 			$this->_helper->flashMessenger(__($authVars['register']['successMessage']));
 
 			// Store new user directly thru Garp_Auth so that they're logged in immediately
@@ -164,13 +166,7 @@ class G_AuthController extends Garp_Controller_Action {
 		 * using the current request to fetch params.
 		 */
 		if (!$userData = $adapter->authenticate($this->getRequest())) {
-			// Show the login page again.
-			$request = clone $this->getRequest();
-			$request->setActionName('login')
-				->setParam('errors', $adapter->getErrors())
-				->setParam('postData', $this->getRequest()->getPost());
-			$this->_helper->actionStack($request);
-			$this->_setViewSettings('login');
+			$this->_respondToFaultyProcess($adapter);
 			return;
 		}
 
@@ -252,6 +248,10 @@ class G_AuthController extends Garp_Controller_Action {
 		$this->_helper->viewRenderer->setNoRender(true);
 	}
 
+	public function tokenrequestedAction() {
+		$this->view->title = __('login token requested page title');
+	}
+
 	/**
 	 * Forgot password
 	 * @return Void
@@ -266,106 +266,116 @@ class G_AuthController extends Garp_Controller_Action {
 			$this->view->successMessage = __($authVars['forgotpassword']['success_message']);
 		}
 
-		if ($request->isPost()) {
-			// Honeypot validation
-			$hp = $request->getPost('hp');
-			if (!empty($hp)) {
-				throw new Garp_Auth_Exception(__('honeypot error'));
-			}
+		if (!$request->isPost()) {
+			return;
+		}
 
-			// Find user by email address
-			$this->view->email = $email = $request->getPost('email');
-			$userModel = new Model_User();
-			$user = $userModel->fetchRow(
-				$userModel->select()->where('email = ?', $email)
-			);
-			if (!$user) {
-				$this->view->formError = __('email addr not found');
-			} else {
-				// Update user
-				$activationToken = uniqid();
-				$activationCode  = '';
-				$activationCode .= $activationToken;
-				$activationCode .= md5($email);
-				$activationCode .= md5($authVars['salt']);
-				$activationCode .= md5($user->id);
-				$activationCode = md5($activationCode);
-				$activationUrl = '/g/auth/resetpassword/c/'.$activationCode.'/e/'.md5($email).'/';
+		// Honeypot validation
+		$hp = $request->getPost('hp');
+		if (!empty($hp)) {
+			throw new Garp_Auth_Exception(__('honeypot error'));
+		}
 
-				$activationCodeExpiresColumn = $authVars['forgotpassword']['activation_code_expiration_date_column'];
-				$activationTokenColumn = $authVars['forgotpassword']['activation_token_column'];
-				$activationCodeExpiry = date('Y-m-d', strtotime($authVars['forgotpassword']['activation_code_expires_in']));
+		// Find user by email address
+		$this->view->email = $email = $request->getPost('email');
+		$userModel = new Model_User();
+		$user = $userModel->fetchRow(
+			$userModel->select()->where('email = ?', $email)
+		);
+		if (!$user) {
+			$this->view->formError = __('email addr not found');
+		} else {
+			// Update user
+			$activationToken = uniqid();
+			$activationCode  = '';
+			$activationCode .= $activationToken;
+			$activationCode .= md5($email);
+			$activationCode .= md5($authVars['salt']);
+			$activationCode .= md5($user->id);
+			$activationCode = md5($activationCode);
+			$activationUrl = '/g/auth/resetpassword/c/'.$activationCode.'/e/'.md5($email).'/';
 
-				$user->{$activationCodeExpiresColumn} = $activationCodeExpiry;
-				$user->{$activationTokenColumn} = $activationToken;
+			$activationCodeExpiresColumn = $authVars['forgotpassword']['activation_code_expiration_date_column'];
+			$activationTokenColumn = $authVars['forgotpassword']['activation_token_column'];
+			$activationCodeExpiry = date('Y-m-d', strtotime($authVars['forgotpassword']['activation_code_expires_in']));
 
-				if ($user->save()) {
-					// Render the email message
-					$this->_helper->layout->disableLayout();
-					// Email can be put in a partial...
-					if (!empty($authVars['forgotpassword']['email_partial'])) {
-						$this->view->user = $user;
-						$this->view->activationUrl = $activationUrl;
-						// Add "default" module as a script path so the partial can
-						// be found.
-						$this->view->addScriptPath(APPLICATION_PATH.'/modules/default/views/scripts/');
-						$emailMessage = $this->view->render($authVars['forgotpassword']['email_partial']);
-					} else {
-						// ...or the email can be added as a snippet
-						$snippet_column = !empty($authVars['forgotpassword']['email_snippet_column']) ?
-							$authVars['forgotpassword']['email_snippet_column'] : 'text';
-						$snippet_identifier = !empty($authVars['forgotpassword']['email_snippet_identifier']) ?
-							$authVars['forgotpassword']['email_snippet_identifier'] : 'forgot password email';
-						$snippetModel = $this->_getSnippetModel();
-						$emailSnippet = $snippetModel->fetchByIdentifier($snippet_identifier);
-						$emailMessage = $emailSnippet->{$snippet_column};
-						$emailMessage = Garp_Util_String::interpolate($emailMessage, array(
-							'USERNAME'       => (string)new Garp_Util_FullName($user),
-							'ACTIVATION_URL' => (string)new Garp_Util_FullUrl($activationUrl)
-						));
-					}
+			$user->{$activationCodeExpiresColumn} = $activationCodeExpiry;
+			$user->{$activationTokenColumn} = $activationToken;
 
-					// Send mail to the user
-					// @todo Make this more transparent. Use a Strategy design pattern for instance.
-					$emailMethod = 'ses';
-					$email_content_type = 'Text';
-					if (!empty($authVars['forgotpassword']['email_content_type'])) {
-						$email_content_type = $authVars['forgotpassword']['email_content_type'];
+			if ($user->save()) {
+				// Render the email message
+				$this->_helper->layout->disableLayout();
+				// Email can be put in a partial...
+				if (!empty($authVars['forgotpassword']['email_partial'])) {
+					$this->view->user = $user;
+					$this->view->activationUrl = $activationUrl;
+					// Add "default" module as a script path so the partial can
+					// be found.
+					$this->view->addScriptPath(APPLICATION_PATH.'/modules/default/views/scripts/');
+					$emailMessage = $this->view->render($authVars['forgotpassword']['email_partial']);
+				} else {
+					// ...or the email can be added as a snippet
+					$snippet_column = !empty($authVars['forgotpassword']['email_snippet_column']) ?
+						$authVars['forgotpassword']['email_snippet_column'] : 'text';
+					$snippet_identifier = !empty($authVars['forgotpassword']['email_snippet_identifier']) ?
+						$authVars['forgotpassword']['email_snippet_identifier'] : 'forgot password email';
+					$snippetModel = $this->_getSnippetModel();
+					$emailSnippet = $snippetModel->fetchByIdentifier($snippet_identifier);
+					$emailMessage = $emailSnippet->{$snippet_column};
+					$emailMessage = Garp_Util_String::interpolate($emailMessage, array(
+						'USERNAME'       => (string)new Garp_Util_FullName($user),
+						'ACTIVATION_URL' => (string)new Garp_Util_FullUrl($activationUrl)
+					));
+				}
+
+				// Send mail to the user
+				// @todo Make this more transparent. Use a Strategy design pattern for instance.
+				$emailMethod = 'ses';
+				$email_content_type = 'Text';
+				if (!empty($authVars['forgotpassword']['email_content_type'])) {
+					$email_content_type = $authVars['forgotpassword']['email_content_type'];
+				}
+				if (!empty($authVars['forgotpassword']['email_method'])) {
+					$emailMethod = $authVars['forgotpassword']['email_method'];
+				}
+				if ($emailMethod === 'ses') {
+					$ses = new Garp_Service_Amazon_Ses();
+					$response = $ses->sendEmail(array(
+						'Destination' => $email,
+						'Message'     => array(
+							$email_content_type => $emailMessage,
+						),
+						'Subject'     => __($authVars['forgotpassword']['email_subject']),
+						'Source'      => $authVars['forgotpassword']['email_from_address']
+					));
+				} elseif ($emailMethod === 'zend') {
+					$mail = new Zend_Mail();
+					$mail->setBodyText($emailMessage);
+					$mail->setFrom($authVars['forgotpassword']['email_from_address']);
+					$mail->addTo($email);
+					$mail->setSubject(__($authVars['forgotpassword']['email_subject']));
+					$response = $mail->send();
+				} elseif (Garp_Loader::getInstance()->isLoadable($emailMethod)) {
+					$mailer = new $emailMethod;
+					$response = $mailer->send(array(
+						'to' => $email,
+						'subject' => __($authVars['forgotpassword']['email_subject']),
+						'message' => $emailMessage,
+						'from' => $authVars['forgotpassword']['email_from_address']
+					));
+				} else {
+					throw new Garp_Auth_Exception('Unknown email_method chosen. '.
+						'Please reconfigure auth.forgotpassword.email_method');
+				}
+				if ($response) {
+					if (isset($authVars['forgotpassword']['route'])) {
+						$this->_helper->redirector->gotoRoute(array('success' => 1), $authVars['forgotpassword']['route']);
+					} elseif (isset($authVars['forgotpassword']['url'])) {
+						$targetUrl = $authVars['forgotpassword']['url'];
+						$this->_helper->redirector->gotoUrl($targetUrl . '?success=1');
 					}
-					if (!empty($authVars['forgotpassword']['email_method'])) {
-						$emailMethod = $authVars['forgotpassword']['email_method'];
-					}
-					if ($emailMethod === 'ses') {
-						$ses = new Garp_Service_Amazon_Ses();
-						$response = $ses->sendEmail(array(
-							'Destination' => $email,
-							'Message'     => array(
-								$email_content_type => $emailMessage,
-							),
-							'Subject'     => __($authVars['forgotpassword']['email_subject']),
-							'Source'      => $authVars['forgotpassword']['email_from_address']
-						));
-					} elseif ($emailMethod === 'zend') {
-						$mail = new Zend_Mail();
-						$mail->setBodyText($emailMessage);
-						$mail->setFrom($authVars['forgotpassword']['email_from_address']);
-						$mail->addTo($email);
-						$mail->setSubject(__($authVars['forgotpassword']['email_subject']));
-						$response = $mail->send();
-					} else {
-						throw new Garp_Auth_Exception('Unknown email_method chosen. '.
-							'Please reconfigure auth.forgotpassword.email_method');
-					}
-					if ($response) {
-						if (isset($authVars['forgotpassword']['route'])) {
-							$this->_helper->redirector->gotoRoute(array('success' => 1), $authVars['forgotpassword']['route']);
-						} elseif (isset($authVars['forgotpassword']['url'])) {
-							$targetUrl = $authVars['forgotpassword']['url'];
-							$this->_helper->redirector->gotoUrl($targetUrl . '?success=1');
-						}
-					} else {
-						$this->view->formError = __($authVars['forgotpassword']['failure_message']);
-					}
+				} else {
+					$this->view->formError = __($authVars['forgotpassword']['failure_message']);
 				}
 			}
 		}
@@ -376,11 +386,9 @@ class G_AuthController extends Garp_Controller_Action {
 	 */
 	public function resetpasswordAction() {
 		$this->view->title = __('reset password page title');
-		$auth = Garp_Auth::getInstance();
-		$authVars = $auth->getConfigValues();
-		$request = $this->getRequest();
-		$activationCode = $request->getParam('c');
-		$activationEmail = $request->getParam('e');
+		$authVars = Garp_Auth::getInstance()->getConfigValues();
+		$activationCode = $this->getRequest()->getParam('c');
+		$activationEmail = $this->getRequest()->getParam('e');
 		$expirationColumn = $authVars['forgotpassword']['activation_code_expiration_date_column'];
 
 		$userModel = new Model_User();
@@ -402,26 +410,40 @@ class G_AuthController extends Garp_Controller_Action {
 		$user = $userModel->fetchRow($select);
 		if (!$user) {
 			$this->view->error = __('reset password user not found');
-		} elseif (strtotime($user->{$expirationColumn}) < time()) {
+			return;
+		}
+		if (strtotime($user->{$expirationColumn}) < time()) {
 			$this->view->error = __('reset password link expired');
-		} else {
-			if ($request->isPost()) {
-				$password = $request->getPost('password');
-				if (!$password) {
-					$this->view->formError = sprintf(__('%s is a required field'), ucfirst(__('password')));
-				} else {
-					// Update the user's password and send him along to the login page
-					$updateClause = $userModel->getAdapter()->quoteInto('id = ?', $user->id);
-					$userModel->update(array(
-						'password' => $password,
-						$authVars['forgotpassword']['activation_token_column'] => null,
-						$authVars['forgotpassword']['activation_code_expiration_date_column'] => null
-					), $updateClause);
-					$this->_helper->flashMessenger(__($authVars['resetpassword']['success_message']));
-					$this->_redirect('/g/auth/login');
-				}
+			return;
+		}
+		if (!$this->getRequest()->isPost()) {
+			return;
+		}
+		$password = $this->getRequest()->getPost('password');
+		if (!$password) {
+			$this->view->formError = sprintf(__('%s is a required field'), ucfirst(__('password')));
+			return;
+		}
+
+		if (!empty($authVars['forgotpassword']['repeatPassword']) &&
+			!empty($authVars['forgotpassword']['repeatPasswordField'])) {
+			$repeatPasswordField =
+				$this->getRequest()->getPost($authVars['forgotpassword']['repeatPasswordField']);
+			if ($password != $repeatPasswordField) {
+				$this->view->formError = __('the passwords do not match');
+				return;
 			}
 		}
+
+		// Update the user's password and send him along to the login page
+		$updateClause = $userModel->getAdapter()->quoteInto('id = ?', $user->id);
+		$userModel->update(array(
+			'password' => $password,
+			$authVars['forgotpassword']['activation_token_column'] => null,
+			$authVars['forgotpassword']['activation_code_expiration_date_column'] => null
+		), $updateClause);
+		$this->_helper->flashMessenger(__($authVars['resetpassword']['success_message']));
+		$this->_redirect('/g/auth/login');
 	}
 
 	/**
@@ -620,6 +642,25 @@ class G_AuthController extends Garp_Controller_Action {
 			return $registerHelper;
 		}
 		return null;
+	}
+
+	/**
+ 	 * Auth adapters may return false if no user is logged in yet.
+ 	 * We then have a couple of options on how to respond. Showing the login page again
+ 	 * with errors would be the default, but some adapters require a redirect to an external site.
+ 	 */
+	protected function _respondToFaultyProcess(Garp_Auth_Adapter_Abstract $authAdapter) {
+		if ($redirectUrl = $authAdapter->getRedirect()) {
+			$this->_helper->redirector->gotoUrl($redirectUrl);
+			return;
+		}
+		// Show the login page again.
+		$request = clone $this->getRequest();
+		$request->setActionName('login')
+			->setParam('errors', $authAdapter->getErrors())
+			->setParam('postData', $this->getRequest()->getPost());
+		$this->_helper->actionStack($request);
+		$this->_setViewSettings('login');
 	}
 
 	/**
