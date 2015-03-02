@@ -34,9 +34,11 @@ class Garp_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bo
 		Zend_Controller_Action_HelperBroker::addPrefix('App_Controller_Helper');
 
 		// View helpers
-		$this->bootstrap('View');
-		$this->getResource('View')->addHelperPath(APPLICATION_PATH.'/modules/default/views/helpers', 'App_View_Helper');
-		$this->getResource('View')->addHelperPath(GARP_APPLICATION_PATH.'/modules/g/views/helpers', 'G_View_Helper');
+		if ($this->hasResource('View')) {
+			$this->bootstrap('View');
+			$this->getResource('View')->addHelperPath(APPLICATION_PATH.'/modules/default/views/helpers', 'App_View_Helper');
+			$this->getResource('View')->addHelperPath(GARP_APPLICATION_PATH.'/modules/g/views/helpers', 'G_View_Helper');
+		}
 	}
 
 	/**
@@ -44,8 +46,12 @@ class Garp_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bo
  	 * @return Void
  	 */
 	protected function _initConfig() {
-		$this->bootstrap('db');
-		$this->bootstrap('locale');
+		if ($this->hasResource('db')) {
+			$this->bootstrap('db');
+		}
+		if ($this->hasResource('locale')) {
+			$this->bootstrap('locale');
+		}
 		$loader = Garp_Loader::getInstance();
 		if (!$loader->isLoadable('Model_Info')) {
 			return;
