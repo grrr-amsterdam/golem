@@ -2,7 +2,7 @@ language: php
 php:
     - '5.3'
 script:
-    - vendor/bin/phpunit --include-path "./library" --bootstrap garp/tests/TestHelper.php tests/
+    - vendor/bin/phpunit --include_path "${TRAVIS_BUILD_DIR}/library" --bootstrap garp/tests/TestHelper.php tests/
 before_script:
     - chmod -R +x vendor
     - ln -nfs library/Zend/Cache/Backend/BlackHole.php library/Zend/Cache/Backend/Blackhole.php
