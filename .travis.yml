@@ -5,7 +5,7 @@ script:
     - vendor/bin/phpunit --bootstrap garp/tests/TestHelper.php tests/
 before_script:
     - chmod -R +x vendor
-    - ln -s library/Zend/Cache/Backend/BlackHole.php library/Zend/Cache/Backend/Blackhole.php
+    - ln -nfs library/Zend/Cache/Backend/Blackhole.php library/Zend/Cache/Backend/BlackHole.php
 notifications:
     email: false
     slack:
