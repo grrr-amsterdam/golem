@@ -6,7 +6,7 @@ script:
     - vendor/bin/phpunit --include-path "${TRAVIS_BUILD_DIR}/library" --bootstrap garp/tests/TestHelper.php tests/
 before_script:
     - chmod -R +x vendor
-    - ln -nfs library/Zend/Cache/Backend/BlackHole.php Blackhole.php
+    - ln -nfs BlackHole.php library/Zend/Cache/Backend/Blackhole.php
 notifications:
     email: false
     slack:
