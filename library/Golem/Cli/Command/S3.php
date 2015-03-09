@@ -95,15 +95,15 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 			))
 		);
 		$args = array(
-			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
-			'--cors-configuration' => "'" . json_encode($corsConfig) . "'"
+			'bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+			'cors-configuration' => "'" . json_encode($corsConfig) . "'"
 		);
 		return $this->s3api('put-bucket-cors', $args);
 	}
 
 	public function getCors() {
 		$args = array(
-			'--bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+			'bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
 		);
 		return $this->s3api('get-bucket-cors', $args);
 	}

@@ -71,7 +71,7 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		$cmd = "aws $group $subCmd";
 		foreach ($keys as $key) {
 			$cmd .= is_numeric($key) ? ' ' : " --{$key}";
-			$cmd .= true === $args[$key] ? '' : $args[$key];
+			$cmd .= true === $args[$key] ? '' : ' ' . $args[$key];
 		}
 
 		$cmd .= " --profile {$this->_profile}";
