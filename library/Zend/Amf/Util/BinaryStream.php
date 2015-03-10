@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Amf
  * @subpackage Util
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: BinaryStream.php 25178 2012-12-22 21:28:48Z rob $
+ * @version    $Id$
  */
 
 /**
@@ -25,7 +25,7 @@
  *
  * @package    Zend_Amf
  * @subpackage Util
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Amf_Util_BinaryStream
@@ -126,12 +126,18 @@ class Zend_Amf_Util_BinaryStream
      * Reads a signed byte
      *
      * @return int Value is in the range of -128 to 127.
+     * @throws Zend_Amf_Exception
      */
     public function readByte()
     {
         if (($this->_needle + 1) > $this->_streamLength) {
             require_once 'Zend/Amf/Exception.php';
-            throw new Zend_Amf_Exception('Buffer underrun at needle position: ' . $this->_needle . ' while requesting length: ' . $length);
+            throw new Zend_Amf_Exception(
+                'Buffer underrun at needle position: '
+                . $this->_needle
+                . ' while requesting length: '
+                . $this->_streamLength
+            );
         }
 
         return ord($this->_stream{$this->_needle++});
