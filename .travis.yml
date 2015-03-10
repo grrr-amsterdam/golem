@@ -9,4 +9,4 @@ before_script:
 notifications:
     email: false
     slack:
-        secure: h9R+NUBeVXZfJ37cbdX72/ICIYS8mXMS2WR8DGDsTCx+mT6cru+D1UvnorXpOcPkv8FdX6aDHfK8LjsAT1a3IgcImRwVW4kdC7hq4L/NNlNNnTTchE/5+N6JqNY9nxrNweivMu/yuG/UzMVPLu5F1pyP3D26WGBelS3Y4eV+SgU=
+        secure: U98DgZzKManIEHvyV09gHzBwuEZqPLCBmtu4VZgs+783/xeq4sIkZEV+zmVw4chs75RTnanEqEpYT/tZCsVqx6NFSoyMUI8dl5dTmdyKlKtDhdeIjizlc+lM29OaqoJAFpcN1GtBASzYXT51qrBIql1Pyp4OFujHP27dfFPC2e0=
