@@ -17,13 +17,28 @@ class Golem_Cli_Command_Git extends Garp_Cli_Command {
  	 */
 	public function setup() {
 		Garp_Cli::lineOut('Configuring Git...');
-		// configure core.fileMode
+		// Configure core.fileMode
 		passthru('git config core.fileMode false');
-		// configure color.ui
+
+		// Configure color.ui
 		passthru('git config color.ui auto');
+
+		// Make sure a master branch exists (git flow will create develop, but not master)
+		if (!$this->_hasBranch('master')) {
+			// create branch
+			passthru('git branch master');
+		}
 
 		// Init Git Flow
 		passthru('git flow init');
+
+		// Set upstreams, only if they exist
+		if ($this->_hasBranch('remotes/origin/master')) {
+			passthru('git branch --set-upstream-to=origin/master master');
+		}
+		if ($this->_hasBranch('remotes/origin/develop')) {
+			passthru('git branch --set-upstream-to=origin/develop develop');
+		}
 
 		Garp_Cli::lineOut('Done.');
 		return true;
@@ -108,6 +123,14 @@ class Golem_Cli_Command_Git extends Garp_Cli_Command {
 		passthru('git commit -m \''.$submoduleCommitMessage.'\'');
 	}
 
+	protected function _hasBranch($branch) {
+		$branches = explode("\n", trim(`git branch -a`));
+		$branches = array_map(function($item) {
+			return ltrim($item, '* ');
+		}, $branches);
+		return in_array($branch, $branches);
+	}
+
 	/**
  	 * Help
  	 */
@@ -116,12 +139,14 @@ class Golem_Cli_Command_Git extends Garp_Cli_Command {
 		Garp_Cli::lineOut('Setup Git environment');
 		Garp_Cli::lineOut('  g Git setup', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
+		/*
 		Garp_Cli::lineOut('Pull from remote and update submodules');
 		Garp_Cli::lineOut('  g Git pull', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('Commit a submodule');
 		Garp_Cli::lineOut('  g Git commitSubmodule garp --m=\'<your commit message>\'', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
+		 */
 	}
 
 }
