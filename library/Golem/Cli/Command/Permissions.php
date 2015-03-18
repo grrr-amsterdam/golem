@@ -10,15 +10,15 @@
 class Golem_Cli_Command_Permissions extends Golem_Cli_Command {
 	/**
  	 * Set permissions on certain folders
- 	 * @param Array $args 
+ 	 * @param Array $args
  	 * @return Boolean
  	 */
 	public function set(array $args = array()) {
 		if (!file_exists('application/data/cache') ||
 			!file_exists('application/data/logs') ||
 			!file_exists('public/uploads')) {
-			Garp_Cli::errorOut('It looks like there are no directories for me to set permissions on.');
-			return false;
+			Garp_Cli::lineOut('It looks like there are no directories for me to set permissions on.', Garp_Cli::YELLOW);
+			return true;
 		}
 		Garp_Cli::lineOut('Setting permissions on writable folders...');
 		passthru('chmod -R 777 application/data/cache');
@@ -31,12 +31,12 @@ class Golem_Cli_Command_Permissions extends Golem_Cli_Command {
 	}
 
 	/**
- 	 * Help	
+ 	 * Help
  	 * @return Boolean
  	 */
 	public function help() {
 		Garp_Cli::lineOut('Usage:');
-		Garp_Cli::lineOut(' golem permissions set', Garp_Cli::BLUE); 
+		Garp_Cli::lineOut(' golem permissions set', Garp_Cli::BLUE);
 		return true;
 	}
 }
