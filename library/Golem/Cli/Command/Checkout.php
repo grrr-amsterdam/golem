@@ -8,13 +8,6 @@
  * @package      Golem_Cli_Command
  */
 class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
-	/**
- 	 * The Git commands
- 	 */
-	const GIT_LS_CMD_BITBUCKET    = 'git ls-remote git@code.grrr.nl:grrr/%s';
-	const GIT_LS_CMD_GITHUB       = 'git ls-remote git@github.com:grrr-amsterdam/%s.git';
-	const GIT_CLONE_CMD_BITBUCKET = 'git clone git@code.grrr.nl:grrr/%s %s --recursive';
-	const GIT_CLONE_CMD_GITHUB    = 'git clone git@github.com:grrr-amsterdam/%s.git %s --recursive';
 
 	/**
  	 * Checkout a project
@@ -34,8 +27,8 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 			$destination = $args[1];
 		}
 
-		// First, figure out where the project lives.
-		$cloneCmd = $this->_createCloneCmd($project, $destination);
+		$gitHelper = new Golem_GitHelper;
+		$cloneCmd = $gitHelper->createCloneCmd($project, $destination);
 		if (!$cloneCmd) {
 			Garp_Cli::errorOut('Project not found.');
 			return false;
@@ -67,27 +60,4 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 		return true;
 	}
 
-	protected function _createCloneCmd($project, $destination) {
-		if ($this->_projectLivesAtGithub($project)) {
-			return sprintf(self::GIT_CLONE_CMD_GITHUB, $project, $destination);
-		}
-		if ($this->_projectLivesAtBitbucket($project)) {
-			return sprintf(self::GIT_CLONE_CMD_BITBUCKET, $project, $destination);
-		}
-		return null;
-	}
-
-	protected function _projectLivesAtGithub($project) {
-		return $this->_checkProjectExistence($project, self::GIT_LS_CMD_GITHUB);
-	}
-
-	protected function _projectLivesAtBitbucket($project) {
-		return $this->_checkProjectExistence($project, self::GIT_LS_CMD_BITBUCKET);
-	}
-
-	protected function _checkProjectExistence($project, $cmd) {
-		$lsCmd = sprintf($cmd, $project);
-		$output = `$lsCmd 2>&1`;
-		return strpos($output, 'Repository not found') === false;
-	}
 }
