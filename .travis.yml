@@ -9,4 +9,8 @@ before_script:
 notifications:
     email: false
     slack:
-        secure: U98DgZzKManIEHvyV09gHzBwuEZqPLCBmtu4VZgs+783/xeq4sIkZEV+zmVw4chs75RTnanEqEpYT/tZCsVqx6NFSoyMUI8dl5dTmdyKlKtDhdeIjizlc+lM29OaqoJAFpcN1GtBASzYXT51qrBIql1Pyp4OFujHP27dfFPC2e0=
+        rooms:
+            - secure: U98DgZzKManIEHvyV09gHzBwuEZqPLCBmtu4VZgs+783/xeq4sIkZEV+zmVw4chs75RTnanEqEpYT/tZCsVqx6NFSoyMUI8dl5dTmdyKlKtDhdeIjizlc+lM29OaqoJAFpcN1GtBASzYXT51qrBIql1Pyp4OFujHP27dfFPC2e0=
+        on_success: change
+        on_failure: always
+        template: "<%{build_url}|%{repository_name} [%{branch}] #%{build_number}>:\n%{message} (in %{duration})\nBy: %{author}\n<%{compare_url}|%{commit_message}>"
