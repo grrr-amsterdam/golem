@@ -21,6 +21,14 @@ class Golem_Scaffold {
 	protected $_target;
 
 	/**
+ 	 * Files / dirs to ignore when copying the Garp_Scaffold files to a blank project.
+ 	 */
+	protected $_ignores = array(
+		'garp',
+		'.travis.yml'
+	);
+
+	/**
  	 * Class constructor
  	 * @param String $scaffoldRepo Scaffold repository
  	 * @param String $target Path to destination directory
@@ -66,7 +74,7 @@ class Golem_Scaffold {
  		 * Git subtree will get confused later on if we try to use this 
  		 * folder as a subtree without going through the proper channels.
  		 */
-		if ($node->getBasename() == 'garp') {
+		if (in_array($node->getBasename(), $this->_ignores)) {
 			return;
 		}
 
