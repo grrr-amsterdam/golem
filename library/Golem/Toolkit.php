@@ -103,8 +103,13 @@ class Golem_Toolkit {
 		// Note: constants such as APPLICATION_PATH are set from the init file.
 		require_once($garpInitPath);
 
+		// Grab Composer's autoloader as well, if available
+		if (file_exists(APPLICATION_PATH . '/../vendor/autoload.php')) {
+			require_once(APPLICATION_PATH . '/../vendor/autoload.php');
+		}
+
 		// Create application and bootstrap
-		$application = new Garp_Application(APPLICATION_ENV, APPLICATION_PATH.'/configs/application.ini');
+		$application = new Garp_Application(APPLICATION_ENV, APPLICATION_PATH . '/configs/application.ini');
 		$application->bootstrap();
 
 		// Save the application in the registry, so it can be used by commands.
