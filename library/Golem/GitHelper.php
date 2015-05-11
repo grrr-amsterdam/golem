@@ -11,9 +11,9 @@ class Golem_GitHelper {
 	/**
  	 * The Git commands
  	 */
-	const GIT_LS_CMD_BITBUCKET    = 'git ls-remote git@code.grrr.nl:grrr/%s';
+	const GIT_LS_CMD_BITBUCKET    = 'git ls-remote git@bitbucket.org:grrr/%s';
 	const GIT_LS_CMD_GITHUB       = 'git ls-remote git@github.com:grrr-amsterdam/%s.git';
-	const GIT_CLONE_CMD_BITBUCKET = 'git clone git@code.grrr.nl:grrr/%s %s --recursive';
+	const GIT_CLONE_CMD_BITBUCKET = 'git clone git@bitbucket.org:grrr/%s %s --recursive';
 	const GIT_CLONE_CMD_GITHUB    = 'git clone git@github.com:grrr-amsterdam/%s.git %s --recursive';
 
 	public function createCloneCmd($project, $destination = '') {
