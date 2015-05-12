@@ -8,6 +8,7 @@ class Golem_Cli_Command_Config extends Golem_Cli_Command {
 			$conf = $conf->{$bits[0]};
 			array_shift($bits);
 		}
-		Garp_Cli::lineOut($conf);
+		Garp_Cli::lineOut($conf instanceof Zend_Config ?
+			Zend_Config_Writer_Yaml::encode($conf->toArray()) : $conf);
 	}
 }
