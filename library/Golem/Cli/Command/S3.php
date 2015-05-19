@@ -50,7 +50,7 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		return $this->s3('cp', $args);
 	}
 
-	public function m(array $args = array()) {
+	public function mv(array $args = array()) {
 		return $this->s3('mv', $args);
 	}
 
