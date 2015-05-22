@@ -42,7 +42,7 @@ class Golem_Toolkit {
  	 * @var Array
  	 */
 	protected static $_sysCommands = array(
-		'sys', 'build', 'checkout', 'vhost', 'complete'
+		'sys', 'build', 'checkout', 'vhost', 'complete', 'update'
 	);
 
 	/**
