@@ -108,6 +108,30 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		return $this->s3api('get-bucket-cors', $args);
 	}
 
+	public function setWebsiteConfiguration() {
+		$websiteConfig = array(
+			'RoutingRules' => $this->_getWebsiteRoutingRules(),
+			'IndexDocument' => array(
+				'Suffix' => 'index.html' // @todo Is this right? It probably never exists...
+			),
+			'ErrorDocument' => array(
+				'Key' => 'error.html'
+			)
+		);
+		$args = array(
+			'bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+			'website-configuration' => "'" . json_encode($websiteConfig) . "'"
+		);
+		return $this->s3api('put-bucket-website', $args);
+	}
+
+	public function getWebsiteConfiguration() {
+		$args = array(
+			'bucket' => Zend_Registry::get('config')->cdn->s3->bucket,
+		);
+		return $this->s3api('get-bucket-website', $args);
+	}
+
 	public function help() {
 		parent::help();
 
@@ -118,6 +142,35 @@ class Golem_Cli_Command_S3 extends Golem_Cli_Command_Aws {
 		Garp_Cli::lineOut(' g s3 ls uploads/images/', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('Remove a file:');
 		Garp_Cli::lineOut(' g s3 rm uploads/images/embarrassing_photo.jpg', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Get CORS configuration:');
+		Garp_Cli::lineOut(' g s3 getCors', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Set CORS configuration:');
+		Garp_Cli::lineOut(' g s3 setCors', Garp_Cli::BLUE);
+	}
 
+	protected function _getWebsiteRoutingRules() {
+		$config = Zend_Registry::get('config');
+		$templates = array();
+		$out = array();
+		$scaledPath = ltrim($config->cdn->path->upload->image . '/scaled/', '/');
+
+		if (!empty($config->image->template)) {
+			$templates = $config->image->template;
+		}
+		foreach ($templates as $tplName => $tplConfig) {
+			$fallback = empty($tplConfig->fallback) ?
+				'fallback_' . $tplName . '.jpg' : $tplConfig->fallback;
+			$out[] = array(
+				'Condition' => array(
+					'HttpErrorCodeReturnedEquals' => '404',
+					'KeyPrefixEquals' => $scaledPath . $tplName
+				),
+				'Redirect' => array(
+					'ReplaceKeyWith' => 'media/images/404fallbacks/' . $fallback
+				)
+			);
+		}
+
+		return $out;
 	}
 }
