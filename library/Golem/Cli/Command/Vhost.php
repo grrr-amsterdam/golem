@@ -19,9 +19,14 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 		$vhostsFile = $golemRc->getData(Golem_Rc::APACHE_VHOSTS_FILE);
 		$hostsFile  = $golemRc->getData(Golem_Rc::HOSTS_FILE);
 		$workspace  = $golemRc->getData(Golem_Rc::WORKSPACE);
+		$config     = Zend_Registry::get('config');
 
-		$project = isset($args[0]) ? $args[0] : Garp_Cli::prompt('Choose project');
-		$localUrl = isset($args[1]) ? $args[1] : Garp_Cli::prompt('Choose local URL');
+		$project = isset($args[0]) ? $args[0] :
+			($this->_toolkit->getCurrentProject() ?: Garp_Cli::prompt('Choose project'));
+		$localUrl = isset($args[1]) ? $args[1] :
+			(isset($config->app->domain) ? $config->app->domain :
+				Garp_Cli::prompt('Choose local URL'));
+
 		// Strip protocol from URL
 		$proto = '://';
 		if (strpos($localUrl, $proto) !== false) {
@@ -75,7 +80,7 @@ class Golem_Cli_Command_Vhost extends Golem_Cli_Command {
 
 		$vhostCode = sprintf($template, $localUrl, $webroot);
 		return $vhostCode;
-	}		
+	}
 
 
 	/**
