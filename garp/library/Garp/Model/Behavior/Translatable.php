@@ -49,6 +49,12 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 	protected $_queue = array();
 
 	/**
+ 	 * Wether to force i18n type output (e.g. arrays with localized content per column)
+ 	 * Usually this only happens in the CMS, or when forced.
+ 	 */
+	protected $_forceI18nOutput = false;
+
+	/**
  	 * Configure this behavior
  	 * @param Array $config
  	 * @return Void
@@ -62,7 +68,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 
 	/**
  	 * An article is nothing without its Chapters. Before every fetch
- 	 * we make sure the chapters are fetched right along, at least in 
+ 	 * we make sure the chapters are fetched right along, at least in
  	 * the CMS.
  	 * @param Array $args Event listener parameters
  	 * @return Void
@@ -72,7 +78,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 		$select = &$args[1];
 
 		$isCms = Zend_Registry::isRegistered('CMS') && Zend_Registry::get('CMS');
-		if (!$isCms) {
+		if (!$isCms && !$this->_forceI18nOutput) {
 			return;
 		}
 		if ($where = $select->getPart(Zend_Db_Select::WHERE)) {
@@ -88,7 +94,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 			}
 		}
 		$this->bindWithI18nModel($model);
-	}	
+	}
 
 	/**
  	 * A real hacky solution to enable admins to search for translated content in the CMS
@@ -117,14 +123,14 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 			foreach ($translatedFields as $i18nField) {
 				$select->orWhere("{$i18nAlias}.{$i18nField} LIKE ?", $likeValue);
 			}
-			
+
 		}
 	}
 
 	/**
  	 * After fetch callback
  	 * @param Array $args
- 	 * @return Void 
+ 	 * @return Void
  	 */
 	public function afterFetch(&$args) {
 		$model   = &$args[0];
@@ -132,10 +138,11 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 		$select  = &$args[2];
 		// In the CMS environment, the translated data is merged into the parent data
 		$isCms = Zend_Registry::isRegistered('CMS') && Zend_Registry::get('CMS');
-		if ($isCms) {
-			$iterator = new Garp_Db_Table_Rowset_Iterator($results, array($this, 'mergeTranslatedFields'));
-			$iterator->walk();
+		if (!$isCms && !$this->_forceI18nOutput) {
+			return;
 		}
+		$iterator = new Garp_Db_Table_Rowset_Iterator($results, array($this, 'mergeTranslatedFields'));
+		$iterator->walk();
 	}
 
 	/**
@@ -143,30 +150,31 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
  	 * @return Void
  	 */
 	public function mergeTranslatedFields($result) {
-		if (isset($result->{self::I18N_MODEL_BINDING_ALIAS})) {
-			$translationRecordList = $result->{self::I18N_MODEL_BINDING_ALIAS}->toArray();
-			$translatedFields = array();
-			$allLocales = Garp_I18n::getLocales();
-			foreach ($this->_translatableFields as $translatableField) {
-				// provide default values
-				foreach ($allLocales as $locale) {
-					$translatedFields[$translatableField][$locale] = null;
-				}
-				foreach ($translationRecordList as $translationRecord) {
-					$lang = $translationRecord[self::LANG_COLUMN];
-					$translatedFields[$translatableField][$lang] = $translationRecord[$translatableField];
-				}
-			}
-			// We now have a $translatedFields array like this:
-			// array(
-			//   "name" => array(
-			//     "nl" => "Schaap",
-			//     "en" => "Sheep"
-			//   )
-			// )
-			$result->setFromArray($translatedFields);
-			unset($result->{self::I18N_MODEL_BINDING_ALIAS});
+		if (!isset($result->{self::I18N_MODEL_BINDING_ALIAS})) {
+			return;
 		}
+		$translationRecordList = $result->{self::I18N_MODEL_BINDING_ALIAS}->toArray();
+		$translatedFields = array();
+		$allLocales = Garp_I18n::getLocales();
+		foreach ($this->_translatableFields as $translatableField) {
+			// provide default values
+			foreach ($allLocales as $locale) {
+				$translatedFields[$translatableField][$locale] = null;
+			}
+			foreach ($translationRecordList as $translationRecord) {
+				$lang = $translationRecord[self::LANG_COLUMN];
+				$translatedFields[$translatableField][$lang] = $translationRecord[$translatableField];
+			}
+		}
+		// We now have a $translatedFields array like this:
+		// array(
+		//   "name" => array(
+		//     "nl" => "Schaap",
+		//     "en" => "Sheep"
+		//   )
+		// )
+		$result->setFromArray($translatedFields);
+		unset($result->{self::I18N_MODEL_BINDING_ALIAS});
 	}
 
 	/**
@@ -187,7 +195,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 	/**
  	 * Callback after inserting or updating.
  	 * @param Garp_Model_Db $model
- 	 * @param Array $primaryKeys 
+ 	 * @param Array $primaryKeys
  	 */
 	protected function _afterSave(Garp_Model_Db $model, $primaryKeys) {
 		if (!$this->_queue) {
@@ -206,7 +214,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 	/**
  	 * Save a new i18n record in the given language
  	 * @param String $language
-	 * @param Garp_Model_Db $model 
+	 * @param Garp_Model_Db $model
 	 * @param Array $primaryKeys
  	 * @return Boolean
  	 */
@@ -255,7 +263,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 
 	/**
  	 * Before insert callback
- 	 * @param Array $args 
+ 	 * @param Array $args
  	 * @return Void
  	 */
 	public function beforeInsert(&$args) {
@@ -296,7 +304,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 
 	/**
  	 * After update callback
- 	 * @param Array $args 
+ 	 * @param Array $args
  	 * @return Void
  	 */
 	public function afterUpdate(&$args) {
@@ -319,6 +327,11 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
  	 * @return Array
  	 */
 	protected function _getPrimaryKeysOfAffectedRows(Garp_Model_Db $model, $where) {
+		if ($draftableObserver = $model->getObserver('Draftable')) {
+			// Unregister so it doesn't screw up the upcoming fetch call
+			$model->unregisterObserver($draftableObserver);
+		}
+
 		$pkExtractor = new Garp_Db_PrimaryKeyExtractor($model, $where);
 		$pks = $pkExtractor->extract();
 		if (count($pks)) {
@@ -331,6 +344,9 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 				$row->setTable($model);
 			}
 			$pks[] = (array)$row->getPrimaryKey();
+		}
+		if ($draftableObserver) {
+			$model->registerObserver($draftableObserver);
 		}
 		return $pks;
 	}
@@ -345,7 +361,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 		$modelName .= self::I18N_MODEL_SUFFIX;
 		$model = new $modelName;
 
-		// Do not block unpublished items, we might not get the right record from the fetchRow() call 
+		// Do not block unpublished items, we might not get the right record from the fetchRow() call
 		// in self::_saveI18nRecord()
 		if ($draftable = $model->getObserver('Draftable')) {
 			$draftable->setBlockOfflineItems(false);
@@ -363,7 +379,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 		$model->bindModel(self::I18N_MODEL_BINDING_ALIAS, array(
 			'modelClass' => $i18nModel,
 			'conditions' => $i18nModel->select()->from(
-				$i18nModel->getName(), 
+				$i18nModel->getName(),
 				array_merge($this->_translatableFields, array(self::LANG_COLUMN))
 			)
 		));
@@ -373,7 +389,7 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
  	 * Create array containing the foreign keys in the relationship mapped to the primary keys from the save.
  	 * @param Array $referenceMap The referenceMap describing the relationship
  	 * @param Arary $primaryKeys The given primary keys
- 	 * @return Array 
+ 	 * @return Array
  	 */
 	protected function _getForeignKeyData(array $referenceMap, array $primaryKeys) {
 		$data = array();
@@ -385,4 +401,9 @@ class Garp_Model_Behavior_Translatable extends Garp_Model_Behavior_Abstract {
 		$data = array_combine($foreignKeyColumns, $primaryKeys);
 		return $data;
 	}
+
+	public function forceI18nOutput($force) {
+		$this->_forceI18nOutput = $force;
+	}
+
 }
