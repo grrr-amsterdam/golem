@@ -25,17 +25,10 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 		}
 		// make sure we're in the right directory
 		chdir($this->_toolkit->getRc()->getData(Golem_Rc::WORKSPACE));
-		
-		if (array_key_exists('svn', $args)) {
-			$versionControl = 'svn';
-		} else {
-			$versionControl = 'git';
-		}
 
 		$projectName = $args[0];
 		$projectRepo = isset($args[1]) ? $args[1] : null;
-		$strategyClassName = 'Golem_Cli_Command_BuildProject_Strategy_'.ucfirst(strtolower($versionControl));
-		$strategy = new $strategyClassName($projectName, $projectRepo);
+		$strategy = new Golem_Cli_Command_BuildProject_Strategy_Git($projectName, $projectRepo);
 		$success = $strategy->build();
 
 		if (!$success) {
@@ -64,9 +57,6 @@ class Golem_Cli_Command_Build extends Golem_Cli_Command {
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('When the repository name is not the same as the projectname:');
 		Garp_Cli::lineOut(' golem build <projectname> <repository>', Garp_Cli::BLUE);
-		Garp_Cli::lineOut('');		
-		Garp_Cli::lineOut('For projects that use Subversion, add option --svn:');
-		Garp_Cli::lineOut(' golem build <projectname> <repository> --svn', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 		return true;
 	}
