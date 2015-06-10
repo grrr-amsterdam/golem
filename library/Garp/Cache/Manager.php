@@ -59,30 +59,36 @@ class Garp_Cache_Manager {
  	 * @return Void
  	 */
 	public static function purgeMemcachedCache($modelNames = array()) {
+		if (!Zend_Registry::isRegistered('CacheFrontend')) {
+			return;
+		}
+
+		if (!Zend_Registry::get('CacheFrontend')->getOption('caching')) {
+			// caching is disabled
+			return;
+		}
+
 		if ($modelNames instanceof Garp_Model_Db) {
 			$modelNames = self::getTagsFromModel($modelNames);
 		}
 
 		if (empty($modelNames)) {
-			if (Zend_Registry::isRegistered('CacheFrontend')) {
-				$cacheFront = Zend_Registry::get('CacheFrontend');
-				$cacheFront->clean(Zend_Cache::CLEANING_MODE_ALL);
-			}
-		} else {
-			foreach ($modelNames as $modelName) {
-				$model = new $modelName();
-				self::_incrementMemcacheVersion($model);
-				if ($model->getObserver('Translatable')) {
-					// Make sure cache is cleared for all languages.
-					$locales = Garp_I18n::getLocales();
-					foreach ($locales as $locale) {
-						try {
-							$modelFactory = new Garp_I18n_ModelFactory($locale);
-							$i18nModel = $modelFactory->getModel($model);
-							self::_incrementMemcacheVersion($i18nModel);
-						} catch (Garp_I18n_ModelFactory_Exception_ModelAlreadyLocalized $e) {
-							// all good in the hood  ｡^‿^｡
-						}
+			$cacheFront = Zend_Registry::get('CacheFrontend');
+			return $cacheFront->clean(Zend_Cache::CLEANING_MODE_ALL);
+		}
+		foreach ($modelNames as $modelName) {
+			$model = new $modelName();
+			self::_incrementMemcacheVersion($model);
+			if ($model->getObserver('Translatable')) {
+				// Make sure cache is cleared for all languages.
+				$locales = Garp_I18n::getLocales();
+				foreach ($locales as $locale) {
+					try {
+						$modelFactory = new Garp_I18n_ModelFactory($locale);
+						$i18nModel = $modelFactory->getModel($model);
+						self::_incrementMemcacheVersion($i18nModel);
+					} catch (Garp_I18n_ModelFactory_Exception_ModelAlreadyLocalized $e) {
+						// all good in the hood  ｡^‿^｡
 					}
 				}
 			}
@@ -164,6 +170,27 @@ class Garp_Cache_Manager {
  	 *              not yet found a way to determine if the atrun daemon actually is active.
  	 */
 	public static function scheduleClear($timestamp, array $tags = array()) {
+		// Use ScheduledJob model if available, otherwise fall back to `at`
+		if (!Garp_Loader::getInstance()->isLoadable('Model_ScheduledJob')) {
+			return static::createAtCommand($timestamp, $tags);
+		}
+		return static::createScheduledJob($timestamp, $tags);
+	}
+
+	public static function createScheduledJob($timestamp, array $tags = array()) {
+		$cmd = 'Cache clear';
+		if (count($tags)) {
+			$cmd .= ' ' . implode(' ', $tags);
+		}
+		$scheduledJobModel = new Model_ScheduledJob();
+		return $scheduledJobModel->insert(array(
+			'command' => $cmd,
+			'at' => date('Y-m-d H:i:s', $timestamp),
+		));
+	}
+
+	/** Ye olde scheduleClear() */
+	public static function createAtCommand($timestamp, array $tags = array()) {
 		$time = date('H:i d.m.y', $timestamp);
 
 		// Sanity check: are php and at available? ('which' returns an empty string in case of failure)

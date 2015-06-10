@@ -18,7 +18,7 @@ Ext.form.CKEditor = function(config) {
         toolbar: [
             ['Bold', 'Italic', '-', 'RemoveFormat'],
             ['Link', 'Unlink'],
-            ['NumberedList','BulletedList', 'Format'],
+            ['NumberedList', 'BulletedList', 'Blockquote', 'Format'],
             ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo', '-', 'Source', '-', 'CharCount']
         ],
 
@@ -82,6 +82,9 @@ Ext.extend(Ext.form.CKEditor, Ext.form.TextArea, {
 
 	isValid: function(value) {
         var charCount = this.getCharCount();
+		if (!this.editor) {
+			return true;
+		}
 
         if (!this.allowBlank && !charCount) {
             if (this.wasBlank) {

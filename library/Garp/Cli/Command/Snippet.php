@@ -38,15 +38,20 @@ class Garp_Cli_Command_Snippet extends Garp_Cli_Command {
 	/**
  	 * Import i18n string files (ex. data/i18n/nl.php) as snippets
  	 */
-	public function storeI18nStrings() {
+	public function storeI18nStrings(array $args = array()) {
 		// @todo Adapt for multiple languages
 		$nl = $this->_loadI18nStrings('nl');
 		$en = $this->_loadI18nStrings('en');
+
+		// Wether the snippets are editable in the CMS
+		$editable = !array_key_exists('editable', $args) || !!$args['editable'];
+		$this->_overwrite = isset($args['overwrite']) && $args['overwrite'];
 
 		foreach ($nl as $key => $value) {
 			$snippet = array(
 				'has_text' => 1,
 				'identifier' => $key,
+				'is_editable' => $editable,
 				'text' => array(
 					'nl' => $value
 				)
@@ -54,11 +59,12 @@ class Garp_Cli_Command_Snippet extends Garp_Cli_Command {
 			if (array_key_exists($key, $en)) {
 				$snippet['text']['en'] = $en[$key];
 			}
-			if ($this->_fetchExisting($key)) {
+			$existing = $this->_fetchExisting($key);
+			if (!$this->_overwrite && $existing) {
 				Garp_Cli::lineOut('Skipping ' . $key . '. Snippet already exists.');
-			} else if ($snippet = $this->_create($snippet)) {
-				Garp_Cli::lineOut('Created snippet ' . $snippet->identifier);
+				continue;
 			}
+			$this->_insertOrUpdate($snippet, $existing);
 		}
 	}
 
@@ -92,10 +98,11 @@ class Garp_Cli_Command_Snippet extends Garp_Cli_Command {
 		foreach ($snippets as $identifier => $data) {
 			$identifier = $this->_normalizeIdentifier($identifier);
 			$snippetData = $data->toArray();
-			$snippetData['identifier'] = $identifier;
-			$existing = $this->_fetchExisting($identifier);
+			$snippetData['identifier'] = isset($snippetData['identifier']) ?
+				$snippetData['identifier'] : $identifier;
+			$existing = $this->_fetchExisting($snippetData['identifier']);
 			if (!$this->_overwrite && $existing) {
-				Garp_Cli::lineOut('Skipping "' . $identifier . '". Snippet already exists.');
+				Garp_Cli::lineOut('Skipping "' . $snippetData['identifier'] . '". Snippet already exists.');
 				continue;
 			}
 			$this->_insertOrUpdate($snippetData, $existing);
@@ -240,6 +247,9 @@ class Garp_Cli_Command_Snippet extends Garp_Cli_Command {
 		Garp_Cli::lineOut('');
 		Garp_Cli::lineOut('To create a snippet interactively:');
  	    Garp_Cli::lineOut('  g snippet create -i', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('');
+		Garp_Cli::lineOut('To add system snippets for an internationalized website:');
+		Garp_Cli::lineOut('  g snippet storeI18nStrings', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 	}
 

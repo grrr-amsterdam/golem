@@ -15,11 +15,8 @@ class G_ErrorController extends Garp_Controller_Action {
 
 	public function errorAction() {
 		Zend_Registry::set('CMS', false);
-
 		$errors = $this->_getParam('error_handler');
-		if ($this->getRequest()->isXmlHttpRequest()) {
-			$this->_helper->layout->disableLayout();
-		}
+		$this->_setLayoutForErrorResponse();
 		if (!$errors) {
 			return;
 		}
@@ -157,7 +154,7 @@ class G_ErrorController extends Garp_Controller_Action {
 		$message .= "\n";
 
 		// Add url
-		$fullUrl = new Garp_Util_FullUrl();
+		$fullUrl = new Garp_Util_FullUrl($this->view->url());
 		$message .= "Url: <{$fullUrl}|{$errors->request->getRequestUri()}>";
 
 
@@ -207,7 +204,12 @@ class G_ErrorController extends Garp_Controller_Action {
 
 	protected function _getApplicationName() {
 		$deployConfig = new Garp_Deploy_Config();
-		$appName = $deployConfig->getParam('production', 'application');
+		try {
+			$appName = $deployConfig->getParam('production', 'application');
+		} catch (Exception $e) {
+			return isset(Zend_Registry::get('config')->app->name) ?
+				Zend_Registry::get('config')->app->name : 'anonymous application';
+		}
 
 		return $appName;
 	}
@@ -251,5 +253,30 @@ class G_ErrorController extends Garp_Controller_Action {
 			$message,
 			'From: ' . self::ERROR_REPORT_MAIL_ADDRESS_FALLBACK
 		);
+	}
+
+	protected function _setLayoutForErrorResponse() {
+		if (!$this->getRequest()->isXmlHttpRequest()) {
+			return;
+		}
+
+		// Disable layout by default in XHR context
+		$this->_helper->layout->disableLayout();
+
+		// Look for JSON as primary accepted type
+		$acceptTypes = $this->getRequest()->getHeader('Accept');
+		if (!$acceptTypes) {
+			return;
+		}
+
+		$acceptTypes = explode(',', $acceptTypes);
+		if (strpos($acceptTypes[0], 'json') !== -1) {
+			// In the case of XHR being true, and JSON being the primary accepted type, render a
+			// Garp view with a nicely laid out error response.
+			$this->_helper->layout->setLayoutPath(GARP_APPLICATION_PATH.'/modules/g/views/layouts');
+			$this->_helper->layout->setLayout('json');
+			$this->view->setScriptPath(GARP_APPLICATION_PATH . '/modules/g/views/scripts/');
+			$this->_helper->viewRenderer('error/json', null, true);
+		}
 	}
 }
