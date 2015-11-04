@@ -38,6 +38,7 @@ class Garp_Cli_Command_Env extends Garp_Cli_Command {
 	public function help() {
 		Garp_Cli::lineOut('Usage:');
 		Garp_Cli::lineOut(' g Env setup', Garp_Cli::BLUE);
+		Garp_Cli::lineOut(' g Env setUnderConstruction [true|false]', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 	}
 }
