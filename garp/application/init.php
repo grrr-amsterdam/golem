@@ -52,41 +52,43 @@ if (
 	$isCli = true;
 }
 
-require GARP_APPLICATION_PATH . '/../library/Garp/Loader.php';
+if (!class_exists('Garp_Loader')) {
+	require GARP_APPLICATION_PATH . '/../library/Garp/Loader.php';
+}
 
 /**
  * Set up class loading.
  */
-$classLoader = Garp_Loader::getInstance(array(
-	'paths' => array(
-		array(
-			'namespace' => '*',
-			'path' => realpath(APPLICATION_PATH.'/../library')
-		),
-		array(
-			'namespace' => 'Garp',
-			'path' => realpath(GARP_APPLICATION_PATH.'/../library')
-		),
-		array(
-			'namespace' => 'Model',
-			'path' => APPLICATION_PATH.'/modules/default/models/',
-			'ignore' => 'Model_'
-		),
-		array(
-			'namespace' => 'G_Model',
-			'path' => GARP_APPLICATION_PATH.'/modules/g/models/',
-			'ignore' => 'G_Model_'
-		),
-		array(
-			'namespace' => 'Mocks_Model',
-			'path' => GARP_APPLICATION_PATH.'/modules/mocks/models/',
-			'ignore' => 'Mocks_Model_'
-		)
+$classLoader = Garp_Loader::getInstance()->addIncludePaths(array(
+	array(
+		'namespace' => '*',
+		'path' => realpath(APPLICATION_PATH.'/../library')
+	),
+	array(
+		'namespace' => 'Garp',
+		'path' => realpath(GARP_APPLICATION_PATH.'/../library')
+	),
+	array(
+		'namespace' => 'Model',
+		'path' => APPLICATION_PATH.'/modules/default/models/',
+		'ignore' => 'Model_'
+	),
+	array(
+		'namespace' => 'G_Model',
+		'path' => GARP_APPLICATION_PATH.'/modules/g/models/',
+		'ignore' => 'G_Model_'
+	),
+	array(
+		'namespace' => 'Mocks_Model',
+		'path' => GARP_APPLICATION_PATH.'/modules/mocks/models/',
+		'ignore' => 'Mocks_Model_'
 	)
 ));
 $classLoader->register();
 
 if (!$isCli && Garp_Application::isUnderConstruction()) {
+	header('HTTP/1.1 503 Service Temporarily Unavailable');
+	header('Retry-After: ' . date(DateTime::RFC2822, strtotime('+5 minutes')));
 	require(GARP_APPLICATION_PATH . '/modules/g/views/scripts/under-construction.phtml');
 	exit;
 }
@@ -215,6 +217,15 @@ function instance($obj) {
 		$obj = new $obj;
 	}
 	return $obj;
+}
+
+/**
+ * Transform array of objects into a new array with just the given key of said objects
+ */
+function array_pluck($array, $column) {
+	return array_map(function($obj) use ($column) {
+		return $obj[$column];
+	}, $array);
 }
 
 /**
