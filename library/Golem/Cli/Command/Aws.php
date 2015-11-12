@@ -101,7 +101,7 @@ class Golem_Cli_Command_Aws extends Golem_Cli_Command {
 		$confStr .= "aws_access_key_id = {$config->cdn->s3->apikey}\n";
 		$confStr .= "aws_secret_access_key = {$config->cdn->s3->secret}\n";
 		$confStr .= "output = json\n";
-		$confStr .= "region = eu-central-1\n\n";
+		$confStr .= "region = eu-west-1\n\n";
 
 		$homeDir = trim(`echo \$HOME`);
 		file_put_contents($homeDir . DIRECTORY_SEPARATOR . self::AWS_CONFIG_LOCATION, $confStr, FILE_APPEND);
