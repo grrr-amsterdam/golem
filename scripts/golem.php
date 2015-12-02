@@ -12,7 +12,7 @@ define('GOLEM_APPLICATION_PATH', realpath(dirname(__FILE__).'/../application'));
 /**
  * Report errors, since we're in CLI.
  * Note that log_errors = 1, which outputs to STDERR. display_errors however outputs to STDOUT. In a CLI
- * environment this results in a double error. display_errors is therefore set to 0 so that STDERR is 
+ * environment this results in a double error. display_errors is therefore set to 0 so that STDERR is
  * the only stream showing errors.
  * @see http://stackoverflow.com/questions/9001911/why-are-php-errors-printed-twice
  */
@@ -32,6 +32,11 @@ $golemToolkit = Golem_Toolkit::getInstance($golemRc);
 
 try {
 	$success = $golemToolkit->main();
+} catch (Garp_Config_Ini_InvalidSectionException $e) {
+	Garp_Cli::errorOut('Invalid environment: ' . APPLICATION_ENV);
+	Garp_Cli::lineOut("Valid options are: \n- " .
+		implode("\n- ", $e->getValidSections()), Garp_Cli::BLUE);
+	$success = false;
 } catch (Exception $e) {
 	$success = false;
 	Garp_Cli::lineOut("");
