@@ -392,8 +392,11 @@ class Golem_Toolkit {
 			return;
 		}
 
-		Zend_Registry::set('Zend_Translate',
-			Garp_I18n::getTranslateByLocale(Zend_Registry::get('Zend_Locale')));
+		// method_exists check for ye olde projects
+		if (method_exists(Garp_I18n, 'getTranslateByLocale')) {
+			Zend_Registry::set('Zend_Translate',
+				Garp_I18n::getTranslateByLocale(Zend_Registry::get('Zend_Locale')));
+		}
 	}
 
 	/**
