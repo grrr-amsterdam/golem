@@ -114,6 +114,11 @@ class Golem_Toolkit {
 
 		// Save the application in the registry, so it can be used by commands.
 		Zend_Registry::set('application', $application);
+
+		// Since localisation is based on a URL, and URLs are not part of a commandline, no
+		// translatation is loaded. But we might need it to convert system messages.
+		$this->_loadTranslate();
+
 		// Last but not least, execute the command.
 		$success = $this->executeCommand($cmd, $args);
 		return $success;
@@ -372,6 +377,26 @@ class Golem_Toolkit {
 	}
 
 	/**
+ 	 * Register Zend_Translate.
+	 * Since localisation is based on a URL, and URLs are not part of a commandline, no
+	 * translatation is loaded. But we might need it to convert system messages, so we do grab it here.
+ 	 * @return Void
+ 	 */
+	protected function _loadTranslate() {
+		if (Zend_Registry::isRegistered('Zend_Translate')) {
+			return;
+		}
+
+		if (!Zend_Registry::isRegistered('Zend_Locale')) {
+			// Hmm, that's a problem. Now what?
+			return;
+		}
+
+		Zend_Registry::set('Zend_Translate',
+			Garp_I18n::getTranslateByLocale(Zend_Registry::get('Zend_Locale')));
+	}
+
+	/**
  	 * Throw an exception.
  	 * Use this method to throw exception, it will make sure the exception class is loaded.
  	 * (we cannot assume autoloading is setup at this point)
@@ -385,4 +410,5 @@ class Golem_Toolkit {
 		require_once(GOLEM_APPLICATION_PATH.'/../library/Golem/Exception/'.$type.'.php');
 		throw new $className($err);
 	}
+
 }
