@@ -45,6 +45,10 @@ class Golem_Toolkit {
 		'sys', 'build', 'checkout', 'vhost', 'complete', 'update'
 	);
 
+	protected $commandsWithoutTranslate = array(
+		'spawn', 'config'
+	);
+
 	/**
  	 * Singleton interface
  	 * @param Golem_Rc $golemRc
@@ -117,8 +121,10 @@ class Golem_Toolkit {
 
 		// Since localisation is based on a URL, and URLs are not part of a commandline, no
 		// translatation is loaded. But we might need it to convert system messages.
-		$this->_loadTranslate();
-
+		if (!in_array($cmd, $this->commandsWithoutTranslate)) {
+			$this->_loadTranslate();
+		}
+		
 		// Last but not least, execute the command.
 		$success = $this->executeCommand($cmd, $args);
 		return $success;
