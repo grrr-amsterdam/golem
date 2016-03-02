@@ -7,6 +7,8 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 	const NEW_INCLUDE_I18N_FILE =  "include GARP_APPLICATION_PATH . '/data/i18n/%s.php';";
 	const OLD_ROUTES_INCLUDE = 'APPLICATION_PATH "/../garp/application/configs/routes.ini"';
 	const NEW_ROUTES_INCLUDE = 'GARP_APPLICATION_PATH "/configs/routes.ini"';
+	const OLD_GARP_DEPLOY_PATH = 'garp/application/configs/deploy.rb';
+	const NEW_GARP_DEPLOY_PATH = 'vendor/grrr-amsterdam/garp3/application/configs/deploy.rb';
 
 	/**
  	 * Migrate garp to the composer version.
@@ -17,6 +19,7 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 		$this->_updateIndexPhp();
 		$this->_updateLocaleFiles();
 		$this->_updateRoutesInclude();
+		$this->_updateCapFile();
 
 		Garp_Cli::lineOut('Done!');
 		Garp_Cli::lineOut('I\'m leaving the original garp folder in case you ' .
@@ -76,5 +79,12 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 		$routes = file_get_contents($file);
 		$routes = str_replace(self::OLD_ROUTES_INCLUDE, self::NEW_ROUTES_INCLUDE, $routes);
 		file_put_contents($file, $routes);
+	}
+
+	protected function _updateCapFile() {
+		$file = 'Capfile';
+		$contents = file_get_contents($file);
+		$contents = str_replace(self::OLD_GARP_DEPLOY_PATH, self::NEW_GARP_DEPLOY_PATH, $contents);
+		file_put_contents($file, $contents);
 	}
 }
