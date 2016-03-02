@@ -1,0 +1,70 @@
+<?php
+class Golem_Cli_Command_Composer extends Golem_Cli_Command {
+	const OLD_INIT_PHP_REFERENCE = '../garp/application/init.php';
+	const NEW_INIT_PHP_REFERENCE = '../vendor/grrr-amsterdam/garp3/application/init.php';
+	const BASEPATH_DEFINITON = "define('BASE_PATH', realpath(dirname(__FILE__) . '/..'));";
+	const INCLUDE_I18N_FILE = "include APPLICATION_PATH.'/../garp/application/data/i18n/%s.php';";
+	const NEW_INCLUDE_I18N_FILE =  "include GARP_APPLICATION_PATH . '/data/i18n/%s.php';";
+
+	/**
+ 	 * Migrate garp to the composer version.
+ 	 */
+	public function migrate() {
+		$this->_requireGarpComposerPackage();
+		$this->_updateSymlinks();
+		$this->_updateIndexPhp();
+		$this->_updateLocaleFiles();
+
+		Garp_Cli::lineOut('Done!');
+		Garp_Cli::lineOut('I\'m leaving the original garp folder in case you ' .
+			'still have to push something from the subtree.', Garp_Cli::BLUE);
+	}
+
+	protected function _requireGarpComposerPackage() {
+		passthru('composer require grrr-amsterdam/garp3:^3.7.0');
+	}
+
+	protected function _updateSymlinks() {
+		passthru('ln -shf ../../vendor/grrr-amsterdam/garp3/public/js public/js/garp');
+		passthru('ln -shf ../../vendor/grrr-amsterdam/garp3/public/css public/css/garp');
+		passthru('ln -shf ../../../vendor/grrr-amsterdam/garp3/public/images ' .
+			'public/media/images/garp');
+	}
+
+	protected function _updateIndexPhp() {
+		// Update include of init.php
+		$indexPhp = file_get_contents('public/index.php');
+		$indexPhp = str_replace(self::OLD_INIT_PHP_REFERENCE,
+			self::NEW_INIT_PHP_REFERENCE, $indexPhp);
+
+		// Put BASE_PATH definition in index.php
+		if (strpos($indexPhp, 'BASE_PATH') === false) {
+			$indexLines = explode("\n", $indexPhp);
+			$indexOfInitPhpInclude = $this->_findIndexOfInitPhpInclude($indexLines);
+			array_splice($indexLines, $indexOfInitPhpInclude, 0, self::BASEPATH_DEFINITON);
+			$indexPhp = implode("\n", $indexLines);
+		}
+
+		file_put_contents('public/index.php', $indexPhp);
+	}
+
+	protected function _updateLocaleFiles() {
+		foreach (array('nl', 'en') as $locale) {
+			$file = "application/data/i18n/$locale.php";
+			$contents = file_get_contents($file);
+			$line = sprintf(self::INCLUDE_I18N_FILE, $locale);
+			$updatedLine = sprintf(self::NEW_INCLUDE_I18N_FILE, $locale);
+			$contents = str_replace($line, $updatedLine, $contents);
+			file_put_contents($file, $contents);
+		}
+	}
+
+	protected function _findIndexOfInitPhpInclude(array $lines) {
+		foreach ($lines as $i => $line) {
+			if (strpos($line, self::NEW_INIT_PHP_REFERENCE) !== false) {
+				return $i;
+			}
+		}
+		return 0;
+	}
+}

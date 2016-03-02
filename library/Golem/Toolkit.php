@@ -102,7 +102,16 @@ class Golem_Toolkit {
 			$this->enterProject($project);
 			// init.php needs BASE_PATH to be defined.
 			define('BASE_PATH', getcwd());
-			$garpInitPath = 'garp/application/init.php';
+
+			$garpInitPath = 'vendor/grrr-amsterdam/garp3/application/init.php';
+			if (!file_exists($garpInitPath)) {
+				Garp_Cli::lineOut(
+					"-----------------------------------------------------------------------\n" .
+					"| ★ Garp is now a proper Composer package. You should really upgrade! |\n" .
+					"-----------------------------------------------------------------------",
+					Garp_Cli::PURPLE);
+				$garpInitPath = 'garp/application/init.php';
+			}
 		}
 		// Note: constants such as APPLICATION_PATH are set from the init file.
 		require_once($garpInitPath);
@@ -124,7 +133,7 @@ class Golem_Toolkit {
 		if (!in_array($cmd, $this->commandsWithoutTranslate)) {
 			$this->_loadTranslate();
 		}
-		
+
 		// Last but not least, execute the command.
 		$success = $this->executeCommand($cmd, $args);
 		return $success;
@@ -297,7 +306,10 @@ class Golem_Toolkit {
 		$garpFolder   = $path.DIRECTORY_SEPARATOR.'garp';
 		$appFolder    = $path.DIRECTORY_SEPARATOR.'application';
 		$publicFolder = $path.DIRECTORY_SEPARATOR.'public';
-		return file_exists($garpFolder) &&
+		$garpInstalledThruComposer = file_exists($path . DIRECTORY_SEPARATOR . 'vendor' .
+			DIRECTORY_SEPARATOR . 'grrr-amsterdam' .
+			DIRECTORY_SEPARATOR . 'garp3');
+		return (file_exists($garpFolder) || $garpInstalledThruComposer) &&
 			file_exists($appFolder) &&
 			file_exists($publicFolder);
 	}
