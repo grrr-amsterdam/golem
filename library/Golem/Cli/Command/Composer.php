@@ -5,6 +5,8 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 	const BASEPATH_DEFINITON = "define('BASE_PATH', realpath(dirname(__FILE__) . '/..'));";
 	const INCLUDE_I18N_FILE = "include APPLICATION_PATH.'/../garp/application/data/i18n/%s.php';";
 	const NEW_INCLUDE_I18N_FILE =  "include GARP_APPLICATION_PATH . '/data/i18n/%s.php';";
+	const OLD_ROUTES_INCLUDE = 'APPLICATION_PATH "/../garp/application/configs/routes.ini"';
+	const NEW_ROUTES_INCLUDE = 'GARP_APPLICATION_PATH "/configs/routes.ini"';
 
 	/**
  	 * Migrate garp to the composer version.
@@ -14,6 +16,7 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 		$this->_updateSymlinks();
 		$this->_updateIndexPhp();
 		$this->_updateLocaleFiles();
+		$this->_updateRoutesInclude();
 
 		Garp_Cli::lineOut('Done!');
 		Garp_Cli::lineOut('I\'m leaving the original garp folder in case you ' .
@@ -66,5 +69,12 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 			}
 		}
 		return 0;
+	}
+
+	protected function _updateRoutesInclude() {
+		$file = 'application/configs/routes.ini';
+		$routes = file_get_contents($file);
+		$routes = str_replace(self::OLD_ROUTES_INCLUDE, self::NEW_ROUTES_INCLUDE, $routes);
+		file_put_contents($file, $routes);
 	}
 }
