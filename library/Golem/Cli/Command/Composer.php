@@ -35,6 +35,8 @@ class Golem_Cli_Command_Composer extends Golem_Cli_Command {
 		passthru('ln -shf ../../vendor/grrr-amsterdam/garp3/public/css public/css/garp');
 		passthru('ln -shf ../../../vendor/grrr-amsterdam/garp3/public/images ' .
 			'public/media/images/garp');
+		passthru('ln -shf ../vendor/grrr-amsterdam/garp3/library/Garp/3rdParty/PHPExcel ' .
+			'library/PHPExcel');
 	}
 
 	protected function _updateIndexPhp() {
