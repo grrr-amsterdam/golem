@@ -113,13 +113,13 @@ class Golem_Toolkit {
 				$garpInitPath = 'garp/application/init.php';
 			}
 		}
+		// Grab Composer's autoloader as well, if available
+		if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
+			require_once(BASE_PATH . '/vendor/autoload.php');
+		}
+
 		// Note: constants such as APPLICATION_PATH are set from the init file.
 		require_once($garpInitPath);
-
-		// Grab Composer's autoloader as well, if available
-		if (file_exists(APPLICATION_PATH . '/../vendor/autoload.php')) {
-			require_once(APPLICATION_PATH . '/../vendor/autoload.php');
-		}
 
 		// Create application and bootstrap
 		$application = new Garp_Application(APPLICATION_ENV, APPLICATION_PATH . '/configs/application.ini');
@@ -205,7 +205,7 @@ class Golem_Toolkit {
 		$garpLoader = Garp_Loader::getInstance();
 		foreach ($prefixes as $prefix) {
 			$fullCmdClassName = $prefix.'_'.$cmdClassName;
-			if ($garpLoader->isLoadable($fullCmdClassName)) {
+			if (class_exists($fullCmdClassName)) {
 				$cmd = new $fullCmdClassName($this);
 				if (!$cmd instanceof Garp_Cli_Command) {
 					$this->_throwException('InvalidCmd', 'Command '.$cmd.' must be of type Garp_Cli_Command');
