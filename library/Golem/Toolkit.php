@@ -46,7 +46,7 @@ class Golem_Toolkit {
 	);
 
 	protected $commandsWithoutTranslate = array(
-		'spawn', 'config'
+		'spawn', 'config', 'models'
 	);
 
 	/**
