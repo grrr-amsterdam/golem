@@ -114,7 +114,7 @@ class Golem_Toolkit {
 			}
 		}
 		// Grab Composer's autoloader as well, if available
-		if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
+		if (defined('BASE_PATH') && file_exists(BASE_PATH . '/vendor/autoload.php')) {
 			require_once(BASE_PATH . '/vendor/autoload.php');
 		}
 
