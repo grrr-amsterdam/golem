@@ -27,8 +27,10 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 			$destination = $args[1];
 		}
 
+		$repo = isset($args['repo']) ? $args['repo'] : '';
+
 		$gitHelper = new Golem_GitHelper;
-		$cloneCmd = $gitHelper->createCloneCmd($project, $destination);
+		$cloneCmd = $gitHelper->createCloneCmd($project, $destination, $repo);
 		if (!$cloneCmd) {
 			Garp_Cli::errorOut('Project not found.');
 			return false;
@@ -57,6 +59,9 @@ class Golem_Cli_Command_Checkout extends Golem_Cli_Command {
 	public function help(array $args = array()) {
 		Garp_Cli::lineOut('Usage:');
 		Garp_Cli::lineOut(' golem checkout <projectname> [<destination-folder>]', Garp_Cli::BLUE);
+		Garp_Cli::lineOut('Add the --repo argument to force a specific repository:');
+		Garp_Cli::lineOut(' golem checkout <projectname> ' .
+			'--repo=git@github.com:grrr-amsterdam/garp3.git', Garp_Cli::BLUE);
 		Garp_Cli::lineOut('');
 		return true;
 	}

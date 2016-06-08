@@ -33,14 +33,21 @@ class Golem_Cli_Command_BuildProject_Strategy_Git {
 	protected $_projectRoot;
 
 	/**
+ 	 * Project repo
+ 	 * @var String
+ 	 */
+	protected $_projectRepo;
+
+	/**
  	 * Class constructor
  	 * @param String $projectName
  	 * @param String $repository
  	 * @return Void
  	 */
-	public function __construct($projectName) {
+	public function __construct($projectName, $projectRepo = null) {
 		$this->_projectName = $projectName;
-		$this->_projectRoot = getcwd().'/'.$projectName;
+		$this->_projectRoot = getcwd() . '/' . $projectName;
+		$this->_projectRepo = $projectRepo;
 	}
 
 	/**
@@ -88,8 +95,11 @@ class Golem_Cli_Command_BuildProject_Strategy_Git {
 	protected function _checkOutProjectRepository() {
 		Garp_Cli::lineOut(' # Cloning project repository', Garp_Cli::YELLOW);
 		$gitHelper = new Golem_GitHelper;
-		$cloneCmd = $gitHelper->createCloneCmd($this->_projectName);
-		//passthru('git clone '.$this->_projectRepository);
+		$cloneCmd = $gitHelper->createCloneCmd(
+			$this->_projectName,
+ 		   	$this->_projectName,
+ 		   	$this->_projectRepo);
+
 		if (!$cloneCmd) {
 			Garp_Cli::errorOut('Project not found.');
 			return false;
