@@ -17,7 +17,7 @@ class Golem_GitHelper {
 	const GIT_CLONE_CMD_GITHUB    = 'git clone git@github.com:grrr-amsterdam/%s.git %s --recursive';
 
 	public function createCloneCmd($project, $destination = '', $repo = null) {
-		if (!is_null($repo)) {
+		if (!$repo) {
 			return sprintf('git clone %s %s --recursive', $repo, $destination);
 		}
 		if ($this->_projectLivesAtGithub($project)) {
