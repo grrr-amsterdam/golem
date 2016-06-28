@@ -205,7 +205,7 @@ class Golem_Toolkit {
 		$garpLoader = Garp_Loader::getInstance();
 		foreach ($prefixes as $prefix) {
 			$fullCmdClassName = $prefix.'_'.$cmdClassName;
-			if (@class_exists($fullCmdClassName)) {
+			if (class_exists($fullCmdClassName)) {
 				$cmd = new $fullCmdClassName($this);
 				if (!$cmd instanceof Garp_Cli_Command) {
 					$this->_throwException('InvalidCmd', 'Command '.$cmd.' must be of type Garp_Cli_Command');
